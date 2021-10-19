@@ -12,7 +12,8 @@
     "antd": "^4.16.13",
     "codemirror": "^5.63.3",
     "react": "^17.0.0",
-    "react-dom": "^17.0.0"
+    "react-dom": "^17.0.0",
+    "use-http": "^1.0.26"
   },
   "devDependencies": {
     "@types/react": "^17.0.0",
