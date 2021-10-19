@@ -15,7 +15,9 @@ async fn main() {
         .route("/", get(index_handler))
         .route("/assets/:path", get(asset_handler));
 
-    axum::Server::bind(&"0.0.0.0:4000".parse().unwrap())
+    let addr = "0.0.0.0:4000";
+    tracing::info!("listening on {}", addr);
+    axum::Server::bind(&addr.parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
