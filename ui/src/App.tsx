@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Table } from "antd";
 import { Layout } from "antd";
 import { Button } from "antd";
+import { Alert } from "antd";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql, MySQL } from "@codemirror/lang-sql";
 import { useFetch } from "use-http";
@@ -28,7 +29,7 @@ const sampleData = [
   },
 ];
 
-const columns = [
+const sampleColumns = [
   {
     title: "Name",
     dataIndex: "name",
@@ -46,27 +47,50 @@ const columns = [
   },
 ];
 
+function buildColumnsByResponse(data: Array<any>) {
+  if (data.length === 0) {
+    return [];
+  }
+  console.log(data);
+
+  const keys = Object.keys(data[0]);
+  return keys.map(function (key) {
+    return {
+      title: key,
+      key: key,
+      dataIndex: key,
+    };
+  });
+}
+
 function App() {
   const [data, setData] = useState(sampleData);
+  const [columns, setColumns] = useState(sampleColumns);
   const [sqlText, setSQLText] = useState("SELECT * FROM system.processlist;");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleRun = async () => {
+    setError("");
     setLoading(true);
     try {
       const requestOptions = {
         method: "POST",
-        headers: { "Content-Type": "application/text" },
-        body: sqlText,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sql: sqlText }),
       };
-      const resp = await fetch("http://localhost:4000/queries", requestOptions);
+      const resp = await fetch("/queries", requestOptions);
       if (!resp.ok) {
         alert(`http error: ${resp.status} ${resp.body}`);
         return;
       }
-      const data = await resp.json();
+      const data = (await resp.json()).rows;
+      const columns = buildColumnsByResponse(data);
       setData(data);
+      setColumns(columns);
+    } catch (err) {
+      console.error(err);
+      setError(`unexpected err: ${err}`);
     } finally {
       setLoading(false);
     }
@@ -88,6 +112,8 @@ function App() {
             }}
           />
         </div>
+
+        {error.length > 0 && <Alert message={error} type="error" />}
 
         <p>
           <Button type="primary" onClick={handleRun} disabled={loading}>
