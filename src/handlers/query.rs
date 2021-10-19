@@ -3,7 +3,7 @@ use axum::response::IntoResponse;
 use axum::Json;
 use std::collections::HashMap;
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Deserialize)]
 pub struct QueryRequest {
     pub sql: String,
 }
