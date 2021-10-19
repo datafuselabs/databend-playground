@@ -43,3 +43,15 @@ pub async fn asset_handler(extract::Path(path): extract::Path<String>) -> impl I
         }
     }
 }
+
+pub async fn index_handler() -> impl IntoResponse {
+    match ASSETS_DIR.get_file("index.html") {
+        None => AssetResponse { content: None },
+        Some(file) => {
+            let buffer = file.contents().iter().map(|c| *c).collect();
+            AssetResponse {
+                content: Some(buffer),
+            }
+        }
+    }
+}
