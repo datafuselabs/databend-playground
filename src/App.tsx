@@ -1,44 +1,77 @@
 import { useState } from "react";
-import logo from "./logo.svg";
-import "./App.css";
+import { Table } from "antd";
+import { Layout } from "antd";
+import { Button } from "antd";
+import CodeMirror from "@uiw/react-codemirror";
+import { sql, MySQL } from "@codemirror/lang-sql";
+import "codemirror/lib/codemirror.css";
+import "codemirror/mode/sql/sql";
+import "codemirror/addon/hint/show-hint.css";
+import "codemirror/addon/hint/show-hint.js";
+import "codemirror/addon/hint/sql-hint.js";
+import "codemirror/theme/ambiance.css";
+import "antd/dist/antd.css";
 
 function App() {
   const [count, setCount] = useState(0);
 
+  const data = [
+    {
+      key: "1",
+      name: "Mike",
+      age: 32,
+      address: "10 Downing Street",
+    },
+    {
+      key: "2",
+      name: "John",
+      age: 42,
+      address: "10 Downing Street",
+    },
+  ];
+
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Age",
+      dataIndex: "age",
+      key: "age",
+    },
+    {
+      title: "Address",
+      dataIndex: "address",
+      key: "address",
+    },
+  ];
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>Hello Vite + React!</p>
+    <Layout>
+      <Layout.Content
+        className="site-layout"
+        style={{ padding: "0 50px", marginTop: 64 }}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <CodeMirror
+            value="SELECT * FROM system.processes;"
+            height="200px"
+            extensions={[sql({ dialect: MySQL })]} // TODO: add tables hint allow auto complete
+            onChange={(value, viewUpdate) => {
+              console.log("value:", value);
+            }}
+          />
+        </div>
+
         <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
-          </button>
+          <Button type="primary">Run !</Button>
         </p>
-        <p>
-          Edit <code>App.tsx</code> and save to test HMR updates.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {" | "}
-          <a
-            className="App-link"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-        </p>
-      </header>
-    </div>
+
+        <Table columns={columns} dataSource={data} />
+      </Layout.Content>
+    </Layout>
   );
 }
 
