@@ -55,7 +55,12 @@ function App() {
   const handleRun = async () => {
     setLoading(true);
     try {
-      const resp = await fetch("/queries");
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/text" },
+        body: sqlText,
+      };
+      const resp = await fetch("http://localhost:4000/queries", requestOptions);
       if (!resp.ok) {
         alert(`http error: ${resp.status} ${resp.body}`);
         return;

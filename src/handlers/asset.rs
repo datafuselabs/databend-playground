@@ -20,28 +20,23 @@ pub async fn index_handler() -> impl IntoResponse {
 }
 
 fn serve_static_asset(path: String) -> Response<Full<Bytes>> {
-    match ASSETS_DIR.get_file(&path) {
-        None => Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body(Full::from(format!("404 NOT FOUND")))
-            .unwrap(),
-        Some(file) => {
-            let buffer: Vec<u8> = file.contents().iter().map(|c| *c).collect();
-            let content_type = if path.ends_with(".js") {
-                "application/javascript"
-            } else if path.ends_with(".css") {
-                "text/css"
-            } else {
-                "text/html; charset=utf8"
-            };
-            Response::builder()
-                .status(StatusCode::OK)
-                .header(
-                    header::CONTENT_TYPE,
-                    HeaderValue::from_str(content_type).unwrap(),
-                )
-                .body(Full::from(buffer))
-                .unwrap()
-        }
-    }
+    let file = match ASSETS_DIR.get_file(&path) {
+        None => return (StatusCode::NOT_FOUND, "Not found").into_response(),
+        Some(file) => file,
+    };
+
+    let buffer: Vec<u8> = file.contents().iter().map(|c| *c).collect();
+    let content_type = HeaderValue::from_str(if path.ends_with(".js") {
+        "application/javascript"
+    } else if path.ends_with(".css") {
+        "text/css"
+    } else {
+        "text/html; charset=utf8"
+    })
+    .unwrap();
+    Response::builder()
+        .status(StatusCode::OK)
+        .header(header::CONTENT_TYPE, content_type)
+        .body(Full::from(buffer))
+        .unwrap()
 }
