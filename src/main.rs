@@ -14,7 +14,9 @@ use tracing_subscriber;
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .init();
 
     let proxy_options = HttpProxyOptions {
         base_api: "http://localhost:8001",
