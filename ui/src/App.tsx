@@ -47,7 +47,7 @@ function processColumns(data: StatementResponse) {
 function App() {
   const [data, setData] = useState(sampleData);
   const [columns, setColumns] = useState(sampleColumns);
-  const [sqlText, setSQLText] = useState("SELECT * FROM system.processlist;");
+  const [sqlText, setSQLText] = useState("SELECT * FROM system.processes;");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -57,7 +57,8 @@ function App() {
     try {
       const resp = await postStatement(sqlText);
       if (resp.error) {
-        setError(`http error: ${resp.status} ${resp.error}`);
+        setError(`Query error: ${resp.error}`);
+        setData([]);
         return;
       }
       const data = resp.data as StatementResponse;
@@ -65,7 +66,8 @@ function App() {
       setData(data.data);
       setColumns(columns);
     } catch (err) {
-      setError(`unexpected err: ${err}`);
+      setError(`Unexpected err: ${err}`);
+      setData([]);
     } finally {
       setLoading(false);
     }
@@ -88,7 +90,11 @@ function App() {
           />
         </div>
 
-        {error.length > 0 && <Alert message={error} type="error" />}
+        {error.length > 0 && (
+          <p>
+            <Alert message={error} type="error" />
+          </p>
+        )}
 
         <p>
           <Button type="primary" onClick={handleRun} disabled={loading}>
