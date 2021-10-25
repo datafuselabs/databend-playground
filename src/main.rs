@@ -1,3 +1,4 @@
+mod error;
 mod handlers;
 
 use crate::handlers::asset_handler;

@@ -1,9 +1,10 @@
+use crate::error::Error;
+use crate::error::Result;
 use axum::body::Body;
 use axum::body::Full;
 use axum::extract::Extension;
 use axum::http::Request;
 use axum::http::Response;
-use axum::http::StatusCode;
 use axum::response::IntoResponse;
 
 #[derive(Clone, Debug)]
@@ -14,7 +15,7 @@ pub struct HttpProxyOptions {
 pub async fn proxy_handler(
     request: Request<Body>,
     options: Extension<HttpProxyOptions>,
-) -> impl IntoResponse {
+) -> Result<impl IntoResponse> {
     let base_api = options.0.base_api;
     let method = request.method().clone();
     let path = request
@@ -25,20 +26,15 @@ pub async fn proxy_handler(
     let req = client
         .request(method, format!("{}{}", base_api, path))
         .headers(request.headers().clone());
-    let response = match req.send().await {
-        Ok(response) => response,
-        Err(_) => {
-            return Response::builder()
-                .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .body(Full::from(""))
-                .unwrap()
-        }
-    };
+    let response = req
+        .send()
+        .await
+        .map_err(|err| Error::InternalError(format!("request failed, cause: {}", err)))?;
     let mut builder = Response::builder().status(response.status());
     builder
         .headers_mut()
         .replace(&mut response.headers().clone());
-    builder
+    Ok(builder
         .body(Full::from(response.bytes().await.unwrap()))
-        .unwrap()
+        .unwrap())
 }
