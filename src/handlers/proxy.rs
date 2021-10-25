@@ -6,6 +6,7 @@ use axum::extract::Extension;
 use axum::http::Request;
 use axum::http::Response;
 use axum::response::IntoResponse;
+use std::sync::Arc;
 
 #[derive(Clone, Debug)]
 pub struct HttpProxyOptions {
@@ -14,9 +15,9 @@ pub struct HttpProxyOptions {
 
 pub async fn proxy_handler(
     request: Request<Body>,
-    options: Extension<HttpProxyOptions>,
+    Extension(options): Extension<Arc<HttpProxyOptions>>,
 ) -> Result<impl IntoResponse> {
-    let base_api = options.0.base_api;
+    let base_api = options.base_api.clone();
     let method = request.method().clone();
     let path = request
         .uri()

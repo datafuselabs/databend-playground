@@ -3,6 +3,7 @@ use axum::body::Full;
 use axum::http::Response;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
+use serde_json::json;
 use std::convert::Infallible;
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -28,10 +29,13 @@ impl IntoResponse for Error {
 
     fn into_response(self) -> Response<Self::Body> {
         match self {
-            Error::InternalError(s) => Response::builder()
-                .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .body(Full::from(s))
-                .unwrap(),
+            Error::InternalError(s) => {
+                let output = json!({ "message": s });
+                Response::builder()
+                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .body(Full::from(output.to_string()))
+                    .unwrap()
+            }
         }
     }
 }
