@@ -4,18 +4,16 @@ export interface APIResponse<T, E> {
   data?: T;
 }
 
-export interface StatementResponseColumn {
-  name: string;
-  data_type: string;
-  nullable: boolean;
-}
-
 export interface StatementResponse {
   id: string;
   nextUri: string;
   data: Array<Array<any>>;
   columns: {
-    fields: Array<StatementResponseColumn>;
+    fields: Array<{
+      name: string;
+      data_type: string;
+      nullable: boolean;
+    }>;
   };
 }
 
