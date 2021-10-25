@@ -9,7 +9,6 @@ use axum::handler::get;
 use axum::handler::post;
 use axum::AddExtensionLayer;
 use axum::Router;
-use std::sync::Arc;
 use tokio;
 use tracing_subscriber;
 
@@ -17,15 +16,14 @@ use tracing_subscriber;
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    let proxy_options = Arc::new(HttpProxyOptions {
-        base_api: "http://localhost:8001".to_string(),
-    });
+    let proxy_options = HttpProxyOptions {
+        base_api: "http://localhost:8001",
+    };
     let app = Router::new()
         .route("/v1/statement", post(proxy_handler))
-        .route("/", get(index_handler))
-        .route("/assets/:path", get(asset_handler))
         .layer(AddExtensionLayer::new(proxy_options))
-        .boxed();
+        .route("/", get(index_handler))
+        .route("/assets/:path", get(asset_handler));
 
     let addr = "0.0.0.0:4000";
     tracing::info!("listening on {}", addr);

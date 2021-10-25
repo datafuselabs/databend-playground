@@ -1,21 +1,22 @@
 use crate::error::Error;
 use crate::error::Result;
-use axum::body;
 use axum::body::Body;
 use axum::body::Full;
 use axum::extract::Extension;
 use axum::http::Request;
 use axum::http::Response;
 use axum::response::IntoResponse;
-use std::sync::Arc;
 
 #[derive(Clone, Debug)]
 pub struct HttpProxyOptions {
-    pub base_api: String,
+    pub base_api: &'static str,
 }
 
-pub async fn proxy_handler(request: Request<Body>) -> Result<impl IntoResponse> {
-    let base_api = "http://localhost:8001";
+pub async fn proxy_handler(
+    options: Extension<HttpProxyOptions>,
+    request: Request<Body>,
+) -> Result<impl IntoResponse> {
+    let base_api = options.0.base_api;
     let method = request.method().clone();
     let path = request
         .uri()
