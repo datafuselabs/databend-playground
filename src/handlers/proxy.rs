@@ -1,5 +1,6 @@
 use crate::error::Error;
 use crate::error::Result;
+use axum::body;
 use axum::body::Body;
 use axum::body::Full;
 use axum::extract::Extension;
@@ -13,20 +14,20 @@ pub struct HttpProxyOptions {
     pub base_api: String,
 }
 
-pub async fn proxy_handler(
-    request: Request<Body>,
-    Extension(options): Extension<Arc<HttpProxyOptions>>,
-) -> Result<impl IntoResponse> {
-    let base_api = options.base_api.clone();
+pub async fn proxy_handler(request: Request<Body>) -> Result<impl IntoResponse> {
+    let base_api = "http://localhost:8001";
     let method = request.method().clone();
     let path = request
         .uri()
         .path_and_query()
         .map_or("/".to_string(), |p| p.as_str().to_string());
     let client = reqwest::Client::new();
+    let headers = request.headers().clone();
+    let body: Body = request.into_body();
     let req = client
         .request(method, format!("{}{}", base_api, path))
-        .headers(request.headers().clone());
+        .headers(headers)
+        .body(body);
     let response = req
         .send()
         .await
@@ -35,7 +36,6 @@ pub async fn proxy_handler(
     builder
         .headers_mut()
         .replace(&mut response.headers().clone());
-    Ok(builder
-        .body(Full::from(response.bytes().await.unwrap()))
-        .unwrap())
+    let output = response.bytes().await.unwrap();
+    Ok(builder.body(Full::from(output)).unwrap())
 }
