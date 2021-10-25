@@ -5,7 +5,7 @@ import { Button } from "antd";
 import { Alert } from "antd";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql, MySQL } from "@codemirror/lang-sql";
-import { useFetch } from "use-http";
+import { postStatement, StatementResponse } from "./api";
 import "codemirror/lib/codemirror.css";
 import "codemirror/mode/sql/sql";
 import "codemirror/addon/hint/show-hint.css";
@@ -14,51 +14,32 @@ import "codemirror/addon/hint/sql-hint.js";
 import "codemirror/theme/ambiance.css";
 import "antd/dist/antd.css";
 
-const sampleData = [
-  {
-    key: "1",
-    name: "Mike",
-    age: 32,
-    address: "10 Downing Street",
-  },
-  {
-    key: "2",
-    name: "John",
-    age: 42,
-    address: "10 Downing Street",
-  },
-];
+const sampleData = [["1", "Mike", 32]];
 
 const sampleColumns = [
   {
     title: "Name",
-    dataIndex: "name",
+    dataIndex: 0,
     key: "name",
   },
   {
     title: "Age",
-    dataIndex: "age",
+    dataIndex: 1,
     key: "age",
   },
   {
     title: "Address",
-    dataIndex: "address",
+    dataIndex: 2,
     key: "address",
   },
 ];
 
-function buildColumnsByResponse(data: Array<any>) {
-  if (data.length === 0) {
-    return [];
-  }
-  console.log(data);
-
-  const keys = Object.keys(data[0]);
-  return keys.map(function (key) {
+function processColumns(data: StatementResponse) {
+  return data.columns.fields.map(function (field, idx) {
     return {
-      title: key,
-      key: key,
-      dataIndex: key,
+      title: field.name,
+      key: field.name,
+      dataIndex: idx,
     };
   });
 }
@@ -74,22 +55,16 @@ function App() {
     setError("");
     setLoading(true);
     try {
-      const requestOptions = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sql: sqlText }),
-      };
-      const resp = await fetch("/queries", requestOptions);
-      if (!resp.ok) {
-        alert(`http error: ${resp.status} ${resp.body}`);
+      const resp = await postStatement(sqlText);
+      if (resp.error) {
+        setError(`http error: ${resp.status} ${resp.error}`);
         return;
       }
-      const data = (await resp.json()).rows;
-      const columns = buildColumnsByResponse(data);
-      setData(data);
+      const data = resp.data as StatementResponse;
+      const columns = processColumns(data);
+      setData(data.data);
       setColumns(columns);
     } catch (err) {
-      console.error(err);
       setError(`unexpected err: ${err}`);
     } finally {
       setLoading(false);
