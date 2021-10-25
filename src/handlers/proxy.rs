@@ -9,7 +9,7 @@ use axum::response::IntoResponse;
 
 #[derive(Clone, Debug)]
 pub struct HttpProxyOptions {
-    pub base_api: &'static str,
+    pub base_api: String,
 }
 
 pub async fn proxy_handler(
