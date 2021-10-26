@@ -20,10 +20,10 @@ jobs:
         config:
           # Linux
           - {os: ubuntu-latest, toolchain: stable, target: x86_64-unknown-linux-gnu, cross: false}
-          - {os: ubuntu-latest, toolchain: stable, target: aarch64-unknown-linux-gnu, cross: true}
+          # - {os: ubuntu-latest, toolchain: stable, target: aarch64-unknown-linux-gnu, cross: true}
           # Macos
-          - {os: macos-11, toolchain: stable, target: x86_64-apple-darwin, cross: false}
-          - {os: macos-11, toolchain: stable, target: aarch64-apple-darwin, cross: false}
+          #- {os: macos-11, toolchain: stable, target: x86_64-apple-darwin, cross: false}
+          #- {os: macos-11, toolchain: stable, target: aarch64-apple-darwin, cross: false}
 
     steps:
       - name: Checkout
