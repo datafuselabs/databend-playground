@@ -2,7 +2,14 @@
 
 ## Develop
 
+backend:
+
 ```
-npm install
-npm run dev
+make build
+```
+
+frontend:
+
+```
+make ui-debug
 ```
