@@ -27,6 +27,9 @@ export async function postStatement(
   };
   let resp = await fetch("/v1/statement", options);
   let status = resp.status;
+  if (!resp.ok) {
+    return { status, error: (await resp.json()).message };
+  }
   const data = await resp.json();
   if (data.error) {
     return { status, error: data.error };
