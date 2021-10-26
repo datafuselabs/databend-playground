@@ -24,6 +24,8 @@ header:
     - "README.md"
     - "**/*.md"
     - "**/*.json"
+    - "**/*.svg"
+    - "**/*.html"
     - "rust-toolchain"
     - "rustfmt.toml"
     - "**/*.proto"
