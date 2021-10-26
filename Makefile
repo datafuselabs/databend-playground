@@ -2,6 +2,9 @@ build: ui
 	cargo build
 
 ui:
-	cd ui && npm run build
+	cd ui && npm install && npm run build
 
-.PHONY: ui build
+ui-debug:
+	cd ui && npm install && npm run dev
+
+.PHONY: ui ui-debug build
