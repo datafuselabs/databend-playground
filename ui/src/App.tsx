@@ -44,18 +44,17 @@ function processColumns(data: StatementResponse) {
   });
 }
 
-function App() {
+function useStatementForm(statement: string) {
   const [data, setData] = useState(sampleData);
   const [columns, setColumns] = useState(sampleColumns);
-  const [sqlText, setSQLText] = useState("SELECT * FROM system.processes;");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleRun = async () => {
+  const handleRunStatement = async () => {
     setError("");
     setLoading(true);
     try {
-      const resp = await postStatement(sqlText);
+      const resp = await postStatement(statement);
       if (resp.error) {
         setError(`Query error: ${resp.error}`);
         setData([]);
@@ -73,6 +72,20 @@ function App() {
     }
   };
 
+  return {
+    loading,
+    error,
+    data,
+    columns,
+    handleRunStatement,
+  };
+}
+
+function App() {
+  const [statement, setStatement] = useState("SELECT * FROM system.processes;");
+  let { loading, error, data, columns, handleRunStatement } =
+    useStatementForm(statement);
+
   return (
     <Layout>
       <Layout.Content
@@ -81,11 +94,11 @@ function App() {
       >
         <div style={{ marginBottom: 16 }}>
           <CodeMirror
-            value={sqlText}
+            value={statement}
             height="200px"
             extensions={[sql({ dialect: MySQL })]} // TODO: add tables hint allow auto complete
             onChange={(value, viewUpdate) => {
-              setSQLText(value);
+              setStatement(value);
             }}
           />
         </div>
@@ -97,7 +110,11 @@ function App() {
         )}
 
         <p>
-          <Button type="primary" onClick={handleRun} disabled={loading}>
+          <Button
+            type="primary"
+            onClick={handleRunStatement}
+            disabled={loading}
+          >
             Run !
           </Button>
         </p>
