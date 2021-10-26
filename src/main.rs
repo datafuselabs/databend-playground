@@ -16,7 +16,7 @@ use tokio;
 use tracing_subscriber;
 
 #[derive(clap::Parser)]
-#[clap(version = "1.0", author = "Kevin K. <kbknapp@gmail.com>")]
+#[clap(version = "1.0")]
 struct Opts {
     #[clap(short, long)]
     listen_addr: String,
