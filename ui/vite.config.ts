@@ -20,7 +20,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/v1/statement': {
-        target: "http://localhost:4000",
+        target: "http://localhost:8001",
         changeOrigin: true,
       }
     }
