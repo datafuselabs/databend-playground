@@ -19,7 +19,7 @@ import { Button } from "antd";
 import { Alert } from "antd";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql, MySQL } from "@codemirror/lang-sql";
-import { postStatement, StatementResponse } from "./api";
+import { postStatement, StatementResponse } from "apis/api";
 import "codemirror/lib/codemirror.css";
 import "codemirror/mode/sql/sql";
 import "codemirror/addon/hint/show-hint.css";
@@ -97,15 +97,11 @@ function useStatementForm(statement: string) {
 
 function App() {
   const [statement, setStatement] = useState("SELECT * FROM system.processes;");
-  let { loading, error, data, columns, handleRunStatement } =
-    useStatementForm(statement);
+  let { loading, error, data, columns, handleRunStatement } = useStatementForm(statement);
 
   return (
     <Layout>
-      <Layout.Content
-        className="site-layout"
-        style={{ padding: "0 50px", marginTop: 64 }}
-      >
+      <Layout.Content className="site-layout" style={{ padding: "0 50px", marginTop: 64 }}>
         <div style={{ marginBottom: 16 }}>
           <CodeMirror
             value={statement}
@@ -124,11 +120,7 @@ function App() {
         )}
 
         <p>
-          <Button
-            type="primary"
-            onClick={handleRunStatement}
-            disabled={loading}
-          >
+          <Button type="primary" onClick={handleRunStatement} disabled={loading}>
             Run !
           </Button>
         </p>
