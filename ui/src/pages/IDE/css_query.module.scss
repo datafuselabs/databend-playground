@@ -1,0 +1,37 @@
+.sqlIde {
+  .topTitle {
+    display: flex;
+    justify-content: space-between;
+    span.tips {
+      display: flex;
+      align-items: center;
+      span {
+        padding-left: 10px;
+      }
+    }
+  }
+  .sqlCodeMirror {
+    margin-top: 10px;
+    border: 1px solid #ccc;
+  }
+  .execButton {
+    display: flex;
+    margin-top: 10px;
+  }
+  .tableArea {
+    .tableTips {
+      padding: 10px 0;
+      display: flex;
+      > div {
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+      }
+      .indicators {
+        span {
+          padding-left: 4px;
+        }
+      }
+    }
+  }
+}

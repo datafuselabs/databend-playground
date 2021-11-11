@@ -7,7 +7,7 @@ import MainLayout from "components/Layout";
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const Login = lazy(() => import("@/pages/Login"));
 const SqlIde = lazy(() => import("@/pages/IDE"));
-const Test = lazy(() => import("@/pages/Test"));
+const Test = lazy(() => import("@/pages/IDE/index-backup"));
 
 interface IRouteObject {
   children?: IRouteObject[];
@@ -26,7 +26,7 @@ export const allRouter: IRouteObject[] = [
       {
         index: true,
         path: "/",
-        label: "SQL IDE",
+        label: "Editor",
         icon: <SqlSvg />,
         element: <SqlIde />,
       },
