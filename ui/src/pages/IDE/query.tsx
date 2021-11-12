@@ -14,8 +14,8 @@ import EditSvg from "@/assets/svg/edit";
 import ExecuteSvg from "@/assets/svg/execute";
 import TableSvg from "@/assets/svg/table";
 import TimeSvg from "@/assets/svg/time";
-import DatabaseSvg from "@/assets/svg/database";
 import styles from "./css_query.module.scss";
+import StorageSvg from "@/assets/svg/storage";
 import { getSqlStatement } from "@/apis/sql";
 import { IColumn, IStatementResponse } from "@/types/sql";
 import { filterSize } from "@/utils/math";
@@ -75,7 +75,7 @@ function SqlQuery() {
         <div className={styles.sqlCodeMirror}>
           <CodeMirror
             value={statement}
-            height="200px"
+            height="220px"
             extensions={[sql({ dialect: MySQL })]}
             onChange={(value, viewUpdate) => {
               setStatement(value);
@@ -93,11 +93,11 @@ function SqlQuery() {
               <span>Time:{time < 100 ? time + "ms" : time / 1000 + "s"}</span>
             </div>
             <div className={styles.indicators}>
-              <DatabaseSvg></DatabaseSvg>
+              <StorageSvg></StorageSvg>
               <span>{filterSize(readBytes)}</span>
             </div>
           </div>
-          <Table dataSource={tableData} columns={tableColumns} />
+          <Table pagination={false} dataSource={tableData} columns={tableColumns} />
         </div>
       </div>
     </>

@@ -18,3 +18,22 @@ export interface IColumn<T> {
   key: string;
   dataIndex: T;
 }
+export interface ITableColumn {
+  data_type: string;
+  database: string;
+  is_nullable: boolean;
+  key: string;
+  name: string;
+  table: string;
+  title: string;
+}
+export interface ITableInfo {
+  title: string;
+  key: string;
+  children: Array<ITableColumn>;
+}
+export interface IFields {
+  data_type: string;
+  name: string;
+  nullable: boolean;
+}

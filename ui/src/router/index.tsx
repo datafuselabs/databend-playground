@@ -30,12 +30,6 @@ export const allRouter: IRouteObject[] = [
         icon: <SqlSvg />,
         element: <SqlIde />,
       },
-      {
-        label: "Test",
-        path: "test",
-        icon: <TestSvg />,
-        element: <Test />,
-      },
     ],
   },
   {

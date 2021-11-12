@@ -20,6 +20,7 @@
     "use-http": "^1.0.26"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.176",
     "@types/node": "^16.11.7",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",

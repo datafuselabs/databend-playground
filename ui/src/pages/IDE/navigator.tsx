@@ -1,56 +1,91 @@
 // Copyright 2020 Datafuse Labs.
 
 import { useEffect, useState } from "react";
-import { Select, Input, Space, Tree, Row, Col } from "antd";
+import { Select, Input, Space, Tree, Row, Col, message } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import styles from "./css_navigator.module.scss";
 import DatabaseSvg from "@/assets/svg/database";
 import { getSqlStatement } from "@/apis/sql";
 const { Option } = Select;
 const { Search } = Input;
+import * as _ from "lodash";
+import { IFields, ITableColumn, ITableInfo } from "@/types/sql";
+
+const GET_ALL_DATABASE = `SELECT * FROM system.databases;`;
+function processFields(fields: IFields[]): Array<string> {
+  return fields.map((item: IFields) => {
+    return item.name;
+  });
+}
+function processData(keys: Array<string>, data: Array<Array<string>>): ITableInfo[] {
+  let dataList: Array<ITableColumn> = [];
+  data.map(item => {
+    let tempObj: any = {};
+    item.map((value, index) => {
+      let key = keys[index];
+      tempObj[key] = value;
+    });
+    tempObj["title"] = `${item[0]}(${item[3]})`;
+    tempObj["key"] = `${item[2]}-${item[0]}`;
+    dataList.push(tempObj);
+  });
+  let groupedItems = _(dataList)
+    .groupBy(item => item.table)
+    .map((items, table) => {
+      return {
+        title: table,
+        key: table,
+        children: items,
+      };
+    })
+    .value();
+  return groupedItems;
+}
 function Navigator() {
   const [database, setDatabase] = useState<Array<string>>([]);
+  const [treeData, setTreeData] = useState<ITableInfo[]>([]);
+  const [showLine, setShowLine] = useState<boolean | { showLeafIcon: boolean }>(false);
+  const [selectDefaultDatabase, setSelectDefaultDatabase] = useState<string>("");
   const handleDbChange = (value: string): void => {
-    console.log(`selected ${value}`);
+    getSqlStatement(`SELECT * FROM system.columns where database = '${value}';`)
+      .then(response => {
+        const { columns, data, error } = response;
+        if (error) {
+          message.warning(error);
+          return;
+        }
+        const { fields } = columns;
+        const keys: Array<string> = processFields(fields || []);
+        const json: ITableInfo[] = processData(keys, data);
+        setTreeData(json);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
   const onSearchTableOrFields = (value: string): void => {
     console.log(value);
   };
-  const onSelect = (selectedKeys: any, info: any): void => {
-    console.log("selected", selectedKeys, info);
-  };
   useEffect(() => {
-    getSqlStatement(`SELECT * FROM system.databases;`).then(response => {
-      const tempValue = response.data || [];
+    getSqlStatement(GET_ALL_DATABASE).then(response => {
+      const { error, data } = response;
+      if (error) {
+        message.warning(error);
+        return;
+      }
+      const tempValue = data || [];
       let tempDatabase: Array<string> = [];
       tempValue.map(item => {
         tempDatabase = [...tempDatabase, ...item];
       });
-      setDatabase(tempDatabase);
+      if (tempDatabase.length > 0) {
+        let e = tempDatabase[0];
+        setDatabase(tempDatabase);
+        setSelectDefaultDatabase(e);
+        handleDbChange(e);
+      }
     });
   }, []);
-  const treeData = [
-    {
-      title: "parent 1",
-      key: "0-0",
-      children: [
-        {
-          title: "parent 1-0",
-          key: "0-0-0",
-        },
-      ],
-    },
-    {
-      title: "parent 1-1",
-      key: "0-0-1",
-      children: [
-        {
-          title: "leaf",
-          key: "0-0-1-0",
-        },
-      ],
-    },
-  ];
   return (
     <>
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
@@ -59,7 +94,7 @@ function Navigator() {
             <DatabaseSvg></DatabaseSvg>
           </Col>
           <Col span={20}>
-            <Select style={{ width: "100%" }} onChange={handleDbChange}>
+            <Select value={selectDefaultDatabase} style={{ width: "100%" }} onChange={handleDbChange}>
               {database.map(item => {
                 return (
                   <Option key={item} value={item}>
@@ -73,9 +108,7 @@ function Navigator() {
         <Search placeholder="Search table / fields" onSearch={onSearchTableOrFields} enterButton />
       </Space>
       <div className={styles.treeArea}>
-        <Tree showLine switcherIcon={<DownOutlined />} defaultExpandedKeys={["0-0-0"]} onSelect={onSelect} treeData={treeData}>
-          3
-        </Tree>
+        <Tree showLine={showLine} switcherIcon={<DownOutlined />} treeData={treeData} />
       </div>
     </>
   );
