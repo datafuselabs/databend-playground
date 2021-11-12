@@ -1,24 +1,38 @@
 .sqlIde {
-  .topTitle {
-    display: flex;
-    justify-content: space-between;
-    span.tips {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  .topArea {
+    position: absolute;
+    width: 100%;
+    top: -10px;
+    z-index: 1;
+    background-color: #fff;
+    .topTitle {
       display: flex;
-      align-items: center;
-      span {
-        padding-left: 10px;
+      justify-content: space-between;
+      span.tips {
+        display: flex;
+        align-items: center;
+        span {
+          padding-left: 10px;
+        }
+      }
+      .execButton {
+        display: flex;
+        margin-top: 10px;
       }
     }
-  }
-  .sqlCodeMirror {
-    margin-top: 10px;
-    border: 1px solid #ccc;
-  }
-  .execButton {
-    display: flex;
-    margin-top: 10px;
+    .sqlCodeMirror {
+      margin-top: 10px;
+      border: 1px solid #ccc;
+    }
   }
   .tableArea {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding-top: 264px;
     .tableTips {
       padding: 10px 0;
       display: flex;

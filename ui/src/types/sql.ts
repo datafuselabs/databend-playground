@@ -13,10 +13,10 @@ export interface IStatementResponse {
   stats: any;
 }
 
-export interface IColumn<T> {
+export interface IColumn {
   title: string;
   key: string;
-  dataIndex: T;
+  dataIndex: string | number;
 }
 export interface ITableColumn {
   data_type: string;

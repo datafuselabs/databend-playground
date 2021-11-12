@@ -12,11 +12,13 @@ import * as _ from "lodash";
 import { IFields, ITableColumn, ITableInfo } from "@/types/sql";
 
 const GET_ALL_DATABASE = `SELECT * FROM system.databases;`;
+// deaal columns
 function processFields(fields: IFields[]): Array<string> {
   return fields.map((item: IFields) => {
     return item.name;
   });
 }
+// deal tableData
 function processData(keys: Array<string>, data: Array<Array<string>>): ITableInfo[] {
   let dataList: Array<ITableColumn> = [];
   data.map(item => {
@@ -46,7 +48,10 @@ function Navigator() {
   const [treeData, setTreeData] = useState<ITableInfo[]>([]);
   const [showLine, setShowLine] = useState<boolean | { showLeafIcon: boolean }>(false);
   const [selectDefaultDatabase, setSelectDefaultDatabase] = useState<string>("");
+
+  // swich database
   const handleDbChange = (value: string): void => {
+    setSelectDefaultDatabase(value);
     getSqlStatement(`SELECT * FROM system.columns where database = '${value}';`)
       .then(response => {
         const { columns, data, error } = response;
@@ -61,12 +66,14 @@ function Navigator() {
       })
       .catch(err => {
         console.log(err);
+        setTreeData([]);
       });
   };
   const onSearchTableOrFields = (value: string): void => {
     console.log(value);
   };
   useEffect(() => {
+    // get all database
     getSqlStatement(GET_ALL_DATABASE).then(response => {
       const { error, data } = response;
       if (error) {

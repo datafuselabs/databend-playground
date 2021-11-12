@@ -19,26 +19,53 @@ import StorageSvg from "@/assets/svg/storage";
 import { getSqlStatement } from "@/apis/sql";
 import { IColumn, IStatementResponse } from "@/types/sql";
 import { filterSize } from "@/utils/math";
-
+interface ITableData {
+  database: string;
+  extra_info: string;
+  host: string;
+  id: string | number;
+  memory_usage: number;
+  state: string;
+  type: string;
+}
+function processFields(fields: IColumn[]): Array<string> {
+  return fields.map((item: IColumn) => {
+    return item.key;
+  });
+}
 function processColumns(data: IStatementResponse) {
-  return data.columns.fields.map(function (field, idx) {
+  return data.columns.fields.map(function (field) {
+    console.log(field);
     return {
       title: field.name,
       key: field.name,
-      dataIndex: idx,
+      dataIndex: field.name,
     };
   });
 }
+function processTableData(keys: Array<string>, data: Array<Array<any>>): Array<ITableData> {
+  let dataList: Array<any> = [];
+  data.map(item => {
+    let tempObj: any = {};
+    item.map((value, index) => {
+      let key = keys[index];
+      tempObj[key] = value;
+    });
+    dataList.push(tempObj);
+  });
+  return dataList;
+}
 function SqlQuery() {
   const [statement, setStatement] = useState<string>("SELECT * FROM system.processes;");
-  const [tableData, setTableData] = useState([]);
-  const [time, setTime] = useState(0);
-  const [readRows, setReadRows] = useState(0);
-  const [readBytes, setReadBytes] = useState(0);
-  const [tableColumns, setTableColumns] = useState<IColumn<number>[]>([]);
+  const [tableData, setTableData] = useState<Array<ITableData>>([]);
+  const [time, setTime] = useState<number>(0);
+  const [readRows, setReadRows] = useState<number>(0);
+  const [readBytes, setReadBytes] = useState<number>(0);
+  const [tableColumns, setTableColumns] = useState<IColumn[]>([]);
   const executeSql = async () => {
     const beginTime = +new Date();
     const response: IStatementResponse = await getSqlStatement(statement);
+    const timeEed = +new Date() - beginTime;
     const error: string = response.error;
     if (error) {
       message.error(error);
@@ -48,12 +75,14 @@ function SqlQuery() {
       setTime(0);
       return;
     }
-    const timeEed = +new Date() - beginTime;
     setTime(timeEed - 3);
     const data: any = response.data;
-    const columns: IColumn<number>[] = processColumns(response);
+    const columns: IColumn[] = processColumns(response);
+    const keys: Array<string> = processFields(columns || []);
+    const dealData: Array<ITableData> = processTableData(keys, data);
     setTableColumns(columns);
-    setTableData(data);
+    setTableData(dealData);
+    console.log(columns, dealData, "dealData");
     const { read_rows, read_bytes } = response.stats;
     setReadRows(read_rows);
     setReadBytes(read_bytes);
@@ -62,25 +91,27 @@ function SqlQuery() {
   return (
     <>
       <div className={styles.sqlIde}>
-        <div className={styles.topTitle}>
-          <span className={styles.tips}>
-            <EditSvg></EditSvg>
-            <span>Query</span>
-          </span>
-          <Button type="primary" onClick={executeSql} className={styles.execButton}>
-            <ExecuteSvg />
-            Execute
-          </Button>
-        </div>
-        <div className={styles.sqlCodeMirror}>
-          <CodeMirror
-            value={statement}
-            height="220px"
-            extensions={[sql({ dialect: MySQL })]}
-            onChange={(value, viewUpdate) => {
-              setStatement(value);
-            }}
-          />
+        <div className={styles.topArea}>
+          <div className={styles.topTitle}>
+            <span className={styles.tips}>
+              <EditSvg></EditSvg>
+              <span>Query</span>
+            </span>
+            <Button type="primary" onClick={executeSql} className={styles.execButton}>
+              <ExecuteSvg />
+              Execute
+            </Button>
+          </div>
+          <div className={styles.sqlCodeMirror}>
+            <CodeMirror
+              value={statement}
+              height="220px"
+              extensions={[sql({ dialect: MySQL })]}
+              onChange={(value, viewUpdate) => {
+                setStatement(value);
+              }}
+            />
+          </div>
         </div>
         <div className={styles.tableArea}>
           <div className={styles.tableTips}>
@@ -97,7 +128,7 @@ function SqlQuery() {
               <span>{filterSize(readBytes)}</span>
             </div>
           </div>
-          <Table pagination={false} dataSource={tableData} columns={tableColumns} />
+          <Table rowKey={record => `${record.id}`} pagination={false} dataSource={tableData} columns={tableColumns} />
         </div>
       </div>
     </>

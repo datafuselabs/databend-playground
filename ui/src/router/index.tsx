@@ -1,13 +1,11 @@
 import { lazy } from "react";
 import { useRoutes } from "react-router-dom";
 import SqlSvg from "@/assets/svg/sql";
-import TestSvg from "@/assets/svg/test";
 import MainLayout from "components/Layout";
 
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const Login = lazy(() => import("@/pages/Login"));
 const SqlIde = lazy(() => import("@/pages/IDE"));
-const Test = lazy(() => import("@/pages/IDE/index-backup"));
 
 interface IRouteObject {
   children?: IRouteObject[];
