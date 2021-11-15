@@ -1,22 +1,36 @@
 // Copyright 2020 Datafuse Labs.
 
-import { useEffect, useState } from "react";
-import { Select, Input, Space, Tree, Row, Col, message } from "antd";
+import { FC, useEffect, useState, ReactElement } from "react";
+import { Select, Input, Space, Tree, Row, Col, message, Button } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import styles from "./css_navigator.module.scss";
 import DatabaseSvg from "@/assets/svg/database";
 import { getSqlStatement } from "@/apis/sql";
 const { Option } = Select;
-const { Search } = Input;
 import * as _ from "lodash";
 import { IFields, ITableColumn, ITableInfo } from "@/types/sql";
+import RefreshSvg from "@/assets/svg/refresh";
 
 const GET_ALL_DATABASE = `SELECT * FROM system.databases;`;
+let backUpData: any[] = [];
 // deaal columns
 function processFields(fields: IFields[]): Array<string> {
   return fields.map((item: IFields) => {
     return item.name;
   });
+}
+function groupList(dataList: Array<any>) {
+  let groupedItems = _(dataList)
+    .groupBy(item => item.table)
+    .map((items, table) => {
+      return {
+        title: table,
+        key: table,
+        children: items,
+      };
+    })
+    .value();
+  return groupedItems;
 }
 // deal tableData
 function processData(keys: Array<string>, data: Array<Array<string>>): ITableInfo[] {
@@ -31,24 +45,15 @@ function processData(keys: Array<string>, data: Array<Array<string>>): ITableInf
     tempObj["key"] = `${item[2]}-${item[0]}`;
     dataList.push(tempObj);
   });
-  let groupedItems = _(dataList)
-    .groupBy(item => item.table)
-    .map((items, table) => {
-      return {
-        title: table,
-        key: table,
-        children: items,
-      };
-    })
-    .value();
-  return groupedItems;
+  backUpData = _.cloneDeep(dataList);
+  return groupList(dataList);
 }
-function Navigator() {
+const Navigator: FC = (): ReactElement => {
   const [database, setDatabase] = useState<Array<string>>([]);
   const [treeData, setTreeData] = useState<ITableInfo[]>([]);
   const [showLine, setShowLine] = useState<boolean | { showLeafIcon: boolean }>(false);
   const [selectDefaultDatabase, setSelectDefaultDatabase] = useState<string>("");
-
+  const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
   // swich database
   const handleDbChange = (value: string): void => {
     setSelectDefaultDatabase(value);
@@ -69,11 +74,7 @@ function Navigator() {
         setTreeData([]);
       });
   };
-  const onSearchTableOrFields = (value: string): void => {
-    console.log(value);
-  };
-  useEffect(() => {
-    // get all database
+  const onRefresh = (): void => {
     getSqlStatement(GET_ALL_DATABASE).then(response => {
       const { error, data } = response;
       if (error) {
@@ -91,7 +92,28 @@ function Navigator() {
         setSelectDefaultDatabase(e);
         handleDbChange(e);
       }
+      setExpandedKeys([]);
     });
+  };
+  const onExpand = (expandedKeys: any[]) => {
+    setExpandedKeys(expandedKeys);
+  };
+  const onSearch = (e: any): void => {
+    let { value } = e.target;
+    value = value.trim();
+    const result = _.filter(backUpData, item => {
+      return item.key.includes(value);
+    });
+    const groupResult = groupList(result);
+    setTreeData(groupResult);
+    const keys = groupResult.map(item => item.title);
+    setExpandedKeys(keys);
+    if (!value) {
+      setExpandedKeys([]);
+    }
+  };
+  useEffect(() => {
+    onRefresh();
   }, []);
   return (
     <>
@@ -112,13 +134,20 @@ function Navigator() {
             </Select>
           </Col>
         </Row>
-        <Search placeholder="Search table / fields" onSearch={onSearchTableOrFields} enterButton />
       </Space>
       <div className={styles.treeArea}>
-        <Tree showLine={showLine} switcherIcon={<DownOutlined />} treeData={treeData} />
+        <Row className={styles.searchInput}>
+          <Col span={20}>
+            <Input onChange={onSearch} placeholder="Search table / fields" />
+          </Col>
+          <Col span={3}>
+            <Button onClick={onRefresh} className={styles.refreshBtn} type="primary" icon={<RefreshSvg />}></Button>
+          </Col>
+        </Row>
+        <Tree onExpand={onExpand} expandedKeys={expandedKeys} showLine={showLine} switcherIcon={<DownOutlined />} treeData={treeData} />
       </div>
     </>
   );
-}
+};
 
 export default Navigator;

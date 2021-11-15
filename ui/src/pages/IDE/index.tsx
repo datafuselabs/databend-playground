@@ -3,7 +3,8 @@ import Navigator from "./navigator";
 import SqlQuery from "./query";
 
 import styles from "./css_index.module.scss";
-function App() {
+import { FC, ReactElement } from "react";
+const SqlIde: FC = (): ReactElement => {
   return (
     <div className={styles.main}>
       <div className={styles.navigator}>
@@ -14,6 +15,6 @@ function App() {
       </div>
     </div>
   );
-}
+};
 
-export default App;
+export default SqlIde;

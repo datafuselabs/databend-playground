@@ -1,6 +1,6 @@
 // Copyright 2020 Datafuse Labs.
 
-import { useState } from "react";
+import { FC, ReactElement, useState } from "react";
 import { Button, Table, message } from "antd";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql, MySQL } from "@codemirror/lang-sql";
@@ -35,7 +35,6 @@ function processFields(fields: IColumn[]): Array<string> {
 }
 function processColumns(data: IStatementResponse) {
   return data.columns.fields.map(function (field) {
-    console.log(field);
     return {
       title: field.name,
       key: field.name,
@@ -55,7 +54,7 @@ function processTableData(keys: Array<string>, data: Array<Array<any>>): Array<I
   });
   return dataList;
 }
-function SqlQuery() {
+const SqlQuery: FC = (): ReactElement => {
   const [statement, setStatement] = useState<string>("SELECT * FROM system.processes;");
   const [tableData, setTableData] = useState<Array<ITableData>>([]);
   const [time, setTime] = useState<number>(0);
@@ -82,7 +81,6 @@ function SqlQuery() {
     const dealData: Array<ITableData> = processTableData(keys, data);
     setTableColumns(columns);
     setTableData(dealData);
-    console.log(columns, dealData, "dealData");
     const { read_rows, read_bytes } = response.stats;
     setReadRows(read_rows);
     setReadBytes(read_bytes);
@@ -133,6 +131,6 @@ function SqlQuery() {
       </div>
     </>
   );
-}
+};
 
 export default SqlQuery;

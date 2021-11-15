@@ -4,4 +4,13 @@
   padding-top: 10px;
   height: 85%;
   overflow-y: auto;
+  .searchInput {
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+  .refreshBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
