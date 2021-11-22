@@ -74,7 +74,7 @@ const Navigator: FC = (): ReactElement => {
         setTreeData([]);
       });
   };
-  const onRefresh = (): void => {
+  const getAllDatabase = (): void => {
     getSqlStatement(GET_ALL_DATABASE).then(response => {
       const { error, data } = response;
       if (error) {
@@ -95,6 +95,9 @@ const Navigator: FC = (): ReactElement => {
       setExpandedKeys([]);
     });
   };
+  const onRefresh = (): void => {
+    getAllDatabase();
+  };
   const onExpand = (expandedKeys: any[]) => {
     setExpandedKeys(expandedKeys);
   };
@@ -113,7 +116,7 @@ const Navigator: FC = (): ReactElement => {
     }
   };
   useEffect(() => {
-    onRefresh();
+    getAllDatabase();
   }, []);
   return (
     <>
