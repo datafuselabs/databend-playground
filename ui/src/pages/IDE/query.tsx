@@ -59,7 +59,7 @@ function processColumns(data: IStatementResponse) {
 const SqlQuery: FC = (): ReactElement => {
   const RUNNING = "Running...";
   const [cancelUrl, setCancelUrl] = useState(""); // cache final_uri
-  const [statement, setStatement] = useState<string>("SELECT *,*,*,*,*,*,* FROM system.tables;");
+  const [statement, setStatement] = useState<string>("");
   const [tableData, setTableData] = useState<Array<ITableData>>([]);
   const [time, setTime] = useState<number>(0);
   const [readRows, setReadRows] = useState<number>(0);
