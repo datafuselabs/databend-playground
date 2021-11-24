@@ -3,15 +3,26 @@ import Navigator from "./navigator";
 import SqlQuery from "./query";
 
 import styles from "./css_index.module.scss";
-import { FC, ReactElement } from "react";
+import { FC, ReactElement, useState } from "react";
 const SqlIde: FC = (): ReactElement => {
+  const [tableTips, setTableTips] = useState<any>([]);
+  const getTreeData = (data: any): void => {
+    const obj: any = {};
+    data.map((item: any) => {
+      obj[item.table] = [];
+    });
+    if (data && data.length > 0) {
+      obj[data[0].database] = [];
+    }
+    setTableTips(obj);
+  };
   return (
     <div className={styles.main}>
       <div className={styles.navigator}>
-        <Navigator />
+        <Navigator getTreeData={getTreeData} />
       </div>
       <div className={styles.content}>
-        <SqlQuery />
+        <SqlQuery tableCodeTips={tableTips} />
       </div>
     </div>
   );

@@ -58,6 +58,13 @@
 .virtual-table .ant-table-container:after {
   display: none;
 }
+
+.CodeMirror {
+  height: 218px !important;
+}
+.CodeMirror-linenumbers {
+  background-color: #fff;
+}
 .ͼ2 .cm-gutters {
   background-color: #fff;
   border-right: 1px solid #eee;

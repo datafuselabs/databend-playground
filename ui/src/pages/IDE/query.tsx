@@ -2,14 +2,24 @@
 
 import { FC, ReactElement, useState, useEffect } from "react";
 import { Button } from "antd";
-import CodeMirror from "@uiw/react-codemirror";
-import { sql, MySQL } from "@codemirror/lang-sql";
+import { Controlled as CodeMirror } from "react-codemirror2";
 import "codemirror/lib/codemirror.css";
+import "codemirror/addon/fold/foldgutter.js";
+import "codemirror/addon/fold/foldcode.js";
+import "codemirror/addon/fold/brace-fold.js";
+import "codemirror/addon/fold/comment-fold.js";
 import "codemirror/mode/sql/sql";
 import "codemirror/addon/hint/show-hint.css";
 import "codemirror/addon/hint/show-hint.js";
+import "codemirror/addon/lint/lint.js";
 import "codemirror/addon/hint/sql-hint.js";
-import "codemirror/theme/ambiance.css";
+import "codemirror/addon/hint/anyword-hint.js";
+import "codemirror/addon/edit/closebrackets.js";
+import "codemirror/addon/edit/matchbrackets.js";
+import "codemirror/addon/fold/foldgutter.js";
+import "codemirror/addon/fold/foldgutter.css";
+import "codemirror/addon/selection/active-line";
+
 import EditSvg from "@/assets/svg/edit";
 import ExecuteSvg from "@/assets/svg/execute";
 import TableSvg from "@/assets/svg/table";
@@ -27,6 +37,12 @@ import { IColumn, IStatementResponse } from "@/types/sql";
 import { filterSize } from "@/utils/math";
 import { showInfo } from "@/utils/tools";
 import { killConnected } from "./utils";
+
+let winTableCodeTips = {}; // global table tips;
+interface IProps {
+  tableCodeTips: any;
+}
+// console.log(cm.hint);
 interface IQueryError {
   code: string | number;
   message: string;
@@ -47,7 +63,8 @@ function processColumns(data: IStatementResponse) {
     };
   });
 }
-const SqlQuery: FC = (): ReactElement => {
+const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
+  winTableCodeTips = tableCodeTips;
   const TARGET_NUMBER = 10000;
   const RUNNING = "Running...";
   let timerId: any = 0;
@@ -104,7 +121,7 @@ const SqlQuery: FC = (): ReactElement => {
         .catch(error => {
           clearInterval(timerId);
           killConnected(final_uri);
-          console.info(error);
+          showInfo(error);
         });
     }, 1000);
   }
@@ -188,12 +205,28 @@ const SqlQuery: FC = (): ReactElement => {
           </div>
           <div className={styles.sqlCodeMirror}>
             <CodeMirror
-              placeholder="Example: SELECT * FROM system.tables;"
               value={statement}
-              height="220px"
-              extensions={[sql({ dialect: MySQL })]}
-              onChange={value => {
+              options={{
+                mode: "sql",
+                matchBrackets: true,
+                styleActiveLine: true,
+                autoCloseBrackets: true,
+                lint: true,
+                extraKeys: { Tab: "autocomplete" },
+                hintOptions: { completeSingle: false },
+                gutters: ["CodeMirror-lint-markers"],
+                lineNumbers: true,
+              }}
+              onBeforeChange={(editor, data, value) => {
                 setStatement(value);
+              }}
+              onInputRead={editor => {
+                const hintOptions = {
+                  tables: winTableCodeTips,
+                  completeSingle: false,
+                };
+                editor.setOption("hintOptions", hintOptions);
+                editor.showHint();
               }}
             />
           </div>

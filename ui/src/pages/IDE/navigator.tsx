@@ -12,44 +12,12 @@ import * as _ from "lodash";
 import { IFields, ITableColumn, ITableInfo } from "@/types/sql";
 import RefreshSvg from "@/assets/svg/refresh";
 import { killConnected } from "./utils";
+interface Iprops {
+  getTreeData: (e: Array<any>) => void;
+}
 const GET_ALL_DATABASE = `SELECT * FROM system.databases;`;
 let backUpData: any[] = [];
-// deaal columns
-function processFields(fields: IFields[]): Array<string> {
-  return fields.map((item: IFields) => {
-    return item.name;
-  });
-}
-function groupList(dataList: Array<any>) {
-  let groupedItems = _(dataList)
-    .groupBy(item => item.table)
-    .map((items, table) => {
-      return {
-        title: table,
-        key: table,
-        children: items,
-      };
-    })
-    .value();
-  return groupedItems;
-}
-// deal tableData
-function processData(keys: Array<string>, data: Array<Array<string>>): ITableInfo[] {
-  let dataList: Array<ITableColumn> = [];
-  data.map(item => {
-    let tempObj: any = {};
-    item.map((value, index) => {
-      let key = keys[index];
-      tempObj[key] = value;
-    });
-    tempObj["title"] = `${item[0]}(${item[3]})`;
-    tempObj["key"] = `${item[2]}-${item[0]}`;
-    dataList.push(tempObj);
-  });
-  backUpData = _.cloneDeep(dataList);
-  return groupList(dataList);
-}
-const Navigator: FC = (): ReactElement => {
+const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
   const [database, setDatabase] = useState<Array<string>>([]);
   const [treeData, setTreeData] = useState<ITableInfo[]>([]);
   const [showLine, setShowLine] = useState<boolean | { showLeafIcon: boolean }>(false);
@@ -132,8 +100,45 @@ const Navigator: FC = (): ReactElement => {
   useEffect(() => {
     getAllDatabase();
   }, []);
+
+  // deaal columns
+  function processFields(fields: IFields[]): Array<string> {
+    return fields.map((item: IFields) => {
+      return item.name;
+    });
+  }
+  function groupList(dataList: Array<any>) {
+    let groupedItems = _(dataList)
+      .groupBy(item => item.table)
+      .map((items, table) => {
+        return {
+          title: table,
+          key: table,
+          children: items,
+        };
+      })
+      .value();
+    return groupedItems;
+  }
+  // deal tableData
+  function processData(keys: Array<string>, data: Array<Array<string>>): ITableInfo[] {
+    let dataList: Array<ITableColumn> = [];
+    data.map(item => {
+      let tempObj: any = {};
+      item.map((value, index) => {
+        let key = keys[index];
+        tempObj[key] = value;
+      });
+      tempObj["title"] = `${item[0]}(${item[3]})`;
+      tempObj["key"] = `${item[2]}-${item[0]}`;
+      dataList.push(tempObj);
+    });
+    backUpData = _.cloneDeep(dataList);
+    getTreeData(backUpData);
+    return groupList(dataList);
+  }
   return (
-    <SpinLoading tip="Loading..." spinning={loadDatabase}>
+    <>
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
         <Row>
           <Col span={3}>
@@ -153,17 +158,19 @@ const Navigator: FC = (): ReactElement => {
         </Row>
       </Space>
       <div className={styles.treeArea}>
-        <Row className={styles.searchInput}>
-          <Col span={20}>
-            <Input onChange={onSearch} placeholder="Search table / fields" />
-          </Col>
-          <Col span={3}>
-            <Button onClick={onRefresh} className={styles.refreshBtn} type="primary" icon={<RefreshSvg />}></Button>
-          </Col>
-        </Row>
-        <Tree onExpand={onExpand} expandedKeys={expandedKeys} showLine={showLine} switcherIcon={<DownOutlined />} treeData={treeData} />
+        <SpinLoading tip="Loading..." spinning={loadDatabase}>
+          <Row className={styles.searchInput}>
+            <Col span={20}>
+              <Input onChange={onSearch} placeholder="Search table / fields" />
+            </Col>
+            <Col span={3}>
+              <Button onClick={onRefresh} className={styles.refreshBtn} type="primary" icon={<RefreshSvg />}></Button>
+            </Col>
+          </Row>
+          <Tree onExpand={onExpand} expandedKeys={expandedKeys} showLine={showLine} switcherIcon={<DownOutlined />} treeData={treeData} />
+        </SpinLoading>
       </div>
-    </SpinLoading>
+    </>
   );
 };
 
