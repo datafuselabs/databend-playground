@@ -32,6 +32,10 @@ export default defineConfig({
       '/v1/statement': {
         target: "http://localhost:8001",
         changeOrigin: true,
+      },
+      '/v1/query': {
+        target: "http://localhost:8001",
+        changeOrigin: true,
       }
     }
   }

@@ -1,6 +1,9 @@
 export interface IStatementResponse {
   id: string;
   nextUri: string;
+  final_uri: string;
+  next_uri: string;
+  state: string;
   data: Array<Array<any>>;
   columns: {
     fields: Array<{
@@ -10,13 +13,20 @@ export interface IStatementResponse {
     }>;
   };
   error: string,
-  stats: any;
+  stats: {
+    progress: {
+      read_bytes: number;
+      read_rows: number;
+      total_rows_to_read: number;
+    }
+  };
+  stats_uri: string;
 }
 
 export interface IColumn {
-  title: string;
-  key: string;
-  dataIndex: string | number;
+  title?: string;
+  key?: string;
+  dataIndex?: string | number;
 }
 export interface ITableColumn {
   data_type: string;

@@ -10,7 +10,7 @@ const { Option } = Select;
 import * as _ from "lodash";
 import { IFields, ITableColumn, ITableInfo } from "@/types/sql";
 import RefreshSvg from "@/assets/svg/refresh";
-
+import { killConnected } from "./utils";
 const GET_ALL_DATABASE = `SELECT * FROM system.databases;`;
 let backUpData: any[] = [];
 // deaal columns
@@ -76,7 +76,7 @@ const Navigator: FC = (): ReactElement => {
   };
   const getAllDatabase = (): void => {
     getSqlStatement(GET_ALL_DATABASE).then(response => {
-      const { error, data } = response;
+      const { error, data, final_uri } = response;
       if (error) {
         message.warning(error);
         return;
@@ -93,6 +93,9 @@ const Navigator: FC = (): ReactElement => {
         handleDbChange(e);
       }
       setExpandedKeys([]);
+      if (final_uri) {
+        killConnected(final_uri);
+      }
     });
   };
   const onRefresh = (): void => {

@@ -4,7 +4,7 @@ import { message } from 'antd';
 let axiosInstance: AxiosInstance = axios.create({
   baseURL: '/',
   headers: {
-    "Content-Type": "application/text"
+    "Content-Type": "application/json;charset=UTF-8"
   }
 });
 

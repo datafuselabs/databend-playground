@@ -46,6 +46,43 @@
           padding-left: 4px;
         }
       }
+      .scaleBtn {
+        > button {
+          display: flex;
+          align-items: center;
+          svg {
+            margin-right: 10px;
+          }
+        }
+        .resultBtn {
+          margin-left: 10px;
+        }
+      }
+    }
+    .progress {
+      position: absolute;
+      z-index: 1;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 60%;
+    }
+    .errorBoard {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      z-index: 2;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 61%;
+      background-color: rgba(255, 255, 255);
+      flex-direction: column;
+      .tips {
+        color: #333;
+        font-size: 18px;
+      }
     }
   }
 }

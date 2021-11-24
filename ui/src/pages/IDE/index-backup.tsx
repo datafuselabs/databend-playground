@@ -97,7 +97,7 @@ function useStatementForm(statement: string) {
 }
 
 function App() {
-  const [statement, setStatement] = useState("SELECT * FROM system.processes;");
+  const [statement, setStatement] = useState("SELECT * FROM system.tables;");
   let { loading, error, data, columns, handleRunStatement } = useStatementForm(statement);
 
   return (
