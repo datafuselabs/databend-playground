@@ -1,8 +1,9 @@
 // Copyright 2020 Datafuse Labs.
 
 import { FC, useEffect, useState, ReactElement } from "react";
-import { Select, Input, Space, Tree, Row, Col, message, Button } from "antd";
+import { Select, Input, Space, Tree, Row, Col, message, Button, Spin } from "antd";
 import { DownOutlined } from "@ant-design/icons";
+import SpinLoading from "@/components/Loading/SpinLoading";
 import styles from "./css_navigator.module.scss";
 import DatabaseSvg from "@/assets/svg/database";
 import { getSqlStatement } from "@/apis/sql";
@@ -54,8 +55,10 @@ const Navigator: FC = (): ReactElement => {
   const [showLine, setShowLine] = useState<boolean | { showLeafIcon: boolean }>(false);
   const [selectDefaultDatabase, setSelectDefaultDatabase] = useState<string>("");
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
+  const [loadDatabase, setLoadDatabase] = useState<boolean>(false);
   // swich database
   const handleDbChange = (value: string): void => {
+    setLoadDatabase(true);
     setSelectDefaultDatabase(value);
     getSqlStatement(`SELECT * FROM system.columns where database = '${value}';`)
       .then(response => {
@@ -72,31 +75,39 @@ const Navigator: FC = (): ReactElement => {
       .catch(err => {
         console.log(err);
         setTreeData([]);
+      })
+      .finally(() => {
+        setLoadDatabase(false);
       });
   };
   const getAllDatabase = (): void => {
-    getSqlStatement(GET_ALL_DATABASE).then(response => {
-      const { error, data, final_uri } = response;
-      if (error) {
-        message.warning(error);
-        return;
-      }
-      const tempValue = data || [];
-      let tempDatabase: Array<string> = [];
-      tempValue.map(item => {
-        tempDatabase = [...tempDatabase, ...item];
+    setLoadDatabase(true);
+    getSqlStatement(GET_ALL_DATABASE)
+      .then(response => {
+        const { error, data, final_uri } = response;
+        if (error) {
+          message.warning(error);
+          return;
+        }
+        const tempValue = data || [];
+        let tempDatabase: Array<string> = [];
+        tempValue.map(item => {
+          tempDatabase = [...tempDatabase, ...item];
+        });
+        if (tempDatabase.length > 0) {
+          let e = tempDatabase[0];
+          setDatabase(tempDatabase);
+          setSelectDefaultDatabase(e);
+          handleDbChange(e);
+        }
+        setExpandedKeys([]);
+        if (final_uri) {
+          killConnected(final_uri);
+        }
+      })
+      .finally(() => {
+        setLoadDatabase(false);
       });
-      if (tempDatabase.length > 0) {
-        let e = tempDatabase[0];
-        setDatabase(tempDatabase);
-        setSelectDefaultDatabase(e);
-        handleDbChange(e);
-      }
-      setExpandedKeys([]);
-      if (final_uri) {
-        killConnected(final_uri);
-      }
-    });
   };
   const onRefresh = (): void => {
     getAllDatabase();
@@ -122,7 +133,7 @@ const Navigator: FC = (): ReactElement => {
     getAllDatabase();
   }, []);
   return (
-    <>
+    <SpinLoading tip="Loading..." spinning={loadDatabase}>
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
         <Row>
           <Col span={3}>
@@ -152,7 +163,7 @@ const Navigator: FC = (): ReactElement => {
         </Row>
         <Tree onExpand={onExpand} expandedKeys={expandedKeys} showLine={showLine} switcherIcon={<DownOutlined />} treeData={treeData} />
       </div>
-    </>
+    </SpinLoading>
   );
 };
 

@@ -1,6 +1,6 @@
 // Copyright 2021 Datafuse Labs.
 
-import { FC, ReactElement, useState } from "react";
+import { FC, ReactElement, useState, useEffect } from "react";
 import { Button } from "antd";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql, MySQL } from "@codemirror/lang-sql";
@@ -25,17 +25,8 @@ import Progress from "@/components/Progress";
 import { getSqlNextStatement, getSqlQuery, getSqlStatus } from "@/apis/sql";
 import { IColumn, IStatementResponse } from "@/types/sql";
 import { filterSize } from "@/utils/math";
+import { showInfo } from "@/utils/tools";
 import { killConnected } from "./utils";
-interface ITableData {
-  number?: string | number | any;
-  database: string;
-  extra_info: string;
-  host: string;
-  id: string | number;
-  memory_usage: number;
-  state: string;
-  type: string;
-}
 interface IQueryError {
   code: string | number;
   message: string;
@@ -57,19 +48,26 @@ function processColumns(data: IStatementResponse) {
   });
 }
 const SqlQuery: FC = (): ReactElement => {
+  const TARGET_NUMBER = 10000;
   const RUNNING = "Running...";
+  let timerId: any = 0;
   const [cancelUrl, setCancelUrl] = useState(""); // cache final_uri
-  const [statement, setStatement] = useState<string>("");
-  const [tableData, setTableData] = useState<Array<ITableData>>([]);
+  const [statement, setStatement] = useState<string>("SELECT * FROM system.tables;");
+  const [tableData, setTableData] = useState<Array<any>>([]);
   const [time, setTime] = useState<number>(0);
   const [readRows, setReadRows] = useState<number>(0);
   const [readBytes, setReadBytes] = useState<number>(0);
   const [tableColumns, setTableColumns] = useState<IColumn[]>([{ title: "Execute SQL please" }]);
   const [executeDisabled, setExecuteDisabled] = useState(false);
   const [executeText, setExecuteText] = useState(RUNNING);
-  const [isInit, setIsInit] = useState(true); // Whether it is the first time to enter the program
   const [showError, setShowError] = useState(false);
   const [sqlError, setSqlError] = useState<IQueryError | any>({});
+
+  useEffect(() => {
+    return () => {
+      clearInterval(timerId);
+    }; // called when Component unexplained destruction/destroyed
+  }, []);
 
   /**
    * show error board kanban
@@ -91,7 +89,7 @@ const SqlQuery: FC = (): ReactElement => {
    * @param final_uri
    */
   function updateProgress(stats_uri: string, final_uri: string) {
-    let timerId = setInterval(async () => {
+    timerId = setInterval(async () => {
       getSqlStatus(stats_uri)
         .then(({ state, error }) => {
           updateProgressUi(state);
@@ -118,7 +116,6 @@ const SqlQuery: FC = (): ReactElement => {
     setExecuteDisabled(true);
     setExecuteText(RUNNING);
     setTableData([]);
-    setIsInit(false);
     setShowError(false);
     let rows: any = [];
     let read_bytes_total: number = 0;
@@ -133,7 +130,7 @@ const SqlQuery: FC = (): ReactElement => {
     read_rows_total = (stats.progress && stats.progress.read_rows) || 0;
     if (error) {
       setExecuteDisabled(false);
-      console.info("error info:", error);
+      showInfo(error);
       showErrorBoard(error);
       return;
     } else {
@@ -142,7 +139,7 @@ const SqlQuery: FC = (): ReactElement => {
       setTableColumns(columns);
     }
     try {
-      while (next_uri && rows.length < 100000) {
+      while (next_uri && rows.length < TARGET_NUMBER) {
         const nextResponse = await getSqlNextStatement(next_uri);
         const { data, error, stats } = nextResponse;
 
@@ -163,7 +160,7 @@ const SqlQuery: FC = (): ReactElement => {
       setExecuteDisabled(false);
     } catch (error) {
       setExecuteDisabled(false);
-      console.info("error info:", error);
+      showInfo(error);
     }
   };
   /**
@@ -173,6 +170,7 @@ const SqlQuery: FC = (): ReactElement => {
     killConnected(cancelUrl);
     setExecuteDisabled(false);
     updateProgressUi("Cancelled");
+    clearInterval(timerId);
   };
   return (
     <>
