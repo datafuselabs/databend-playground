@@ -65,6 +65,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
   const [executeText, setExecuteText] = useState(RUNNING);
   const [showError, setShowError] = useState(false);
   const [sqlError, setSqlError] = useState<IQueryError | any>({});
+  const [selectionValue, setSelectionValue] = useState("");
 
   useEffect(() => {
     return () => {
@@ -139,7 +140,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
     let read_bytes_total: number = 0;
     let read_rows_total: number = 0;
     const response: IStatementResponse = await getSqlQuery({
-      sql: statement,
+      sql: selectionValue ? selectionValue : statement,
     });
     let { final_uri, data, next_uri, error, stats_uri, stats } = response;
     setCancelUrl(final_uri);
@@ -229,11 +230,30 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
                 editor.setOption("hintOptions", hintOptions);
                 editor.showHint();
               }}
-              onSelection={(editor, data) => {
+              onCursorActivity={editor => {
                 let value = editor.getSelection();
-                console.log(value);
-                // const n = editor.getRange({ line: data.head.line, ch: data.head.ch });
-                // console.log(n);
+                if (value) {
+                  setSelectionValue(value);
+                }
+              }}
+              onCursor={(editor, data): void => {
+                let sql: string = "";
+                let semiSymbol = ";";
+                let cursorPosition = { line: data.line, ch: data.ch };
+                // get the SQL statement before the current location (up to the last semicolon)
+                const beforeSemicolon = editor.getRange({ line: 0, ch: 0 }, cursorPosition);
+                // get the SQL statement after getting the current location (up to the next semicolon)
+                const lastLine = editor.lastLine();
+                const afterSemicolon = editor.getRange(cursorPosition, { line: lastLine, ch: editor.getLine(lastLine).length });
+                const isEndSemicolon = beforeSemicolon.endsWith(semiSymbol);
+                const before = beforeSemicolon.split(semiSymbol).slice(-1)[0];
+                const after = afterSemicolon.split(semiSymbol)[0];
+                if (isEndSemicolon || (before.trim() === "" && after.trim() === "")) {
+                  sql = beforeSemicolon.split(semiSymbol).slice(-2)[0];
+                } else {
+                  sql = `${before}${after};`;
+                }
+                setSelectionValue(sql);
               }}
             />
           </div>
