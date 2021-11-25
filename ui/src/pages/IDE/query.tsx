@@ -49,20 +49,6 @@ interface IQueryError {
   backtrace: any[] | string;
 }
 
-/**
- * deal colums data
- * @param data
- * @returns
- */
-function processColumns(data: IStatementResponse) {
-  return data.columns.fields.map(function (field, idx) {
-    return {
-      title: field.name,
-      key: field.name,
-      dataIndex: idx,
-    };
-  });
-}
 const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
   winTableCodeTips = tableCodeTips;
   const TARGET_NUMBER = 10000;
@@ -85,7 +71,22 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
       clearInterval(timerId);
     }; // called when Component unexplained destruction/destroyed
   }, []);
-
+  /**
+   * deal colums data
+   * @param data
+   * @returns
+   */
+  function processColumns(data: IStatementResponse) {
+    let len = data.columns.fields.length;
+    return data.columns.fields.map(function (field, idx) {
+      return {
+        title: field.name,
+        key: field.name,
+        dataIndex: idx,
+        width: len < 8 ? null : 170,
+      };
+    });
+  }
   /**
    * show error board kanban
    */
@@ -106,7 +107,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
    * @param final_uri
    */
   function updateProgress(stats_uri: string, final_uri: string) {
-    timerId = setInterval(async () => {
+    timerId = setInterval(() => {
       getSqlStatus(stats_uri)
         .then(({ state, error }) => {
           updateProgressUi(state);
@@ -228,6 +229,12 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
                 editor.setOption("hintOptions", hintOptions);
                 editor.showHint();
               }}
+              onSelection={(editor, data) => {
+                let value = editor.getSelection();
+                console.log(value);
+                // const n = editor.getRange({ line: data.head.line, ch: data.head.ch });
+                // console.log(n);
+              }}
             />
           </div>
         </div>
@@ -267,7 +274,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
             </div>
           )}
           {executeDisabled && <Progress cancel={cancel} executeText={executeText} className={styles.progress}></Progress>}
-          {tableData.length > 0 ? <VirtualTable dataSource={tableData} columns={tableColumns} scroll={{ y: 400, x: true }} /> : <NoDataFragment />}
+          <div className={styles.virtualTable}>{tableData.length > 0 ? <VirtualTable dataSource={tableData} columns={tableColumns} scroll={{ y: 400, x: true }} /> : <NoDataFragment />}</div>
         </div>
       </div>
     </>

@@ -2,6 +2,19 @@
   height: 100%;
   position: relative;
 }
+@mixin ellipsis($line: 1) {
+  @if $line==1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $line;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
 .ant-layout-has-sider {
   height: 100%;
   position: absolute;
@@ -43,20 +56,12 @@
   padding-left: 16px;
   padding-top: 16px;
   border-bottom: 1px solid #e8e8e8;
-  min-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  @include ellipsis;
 }
-.virtual-table {
-  col {
-    min-width: 100px;
-  }
-}
-
-.virtual-table .ant-table-container:before,
-.virtual-table .ant-table-container:after {
-  display: none;
+.virtualTable .ant-table-tbody > tr > td > div {
+  box-sizing: border-box;
+  width: 100%;
+  @include ellipsis;
 }
 
 .CodeMirror {

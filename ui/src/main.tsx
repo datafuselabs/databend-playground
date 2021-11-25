@@ -20,12 +20,12 @@ import "./main.scss";
 import { AppRouters } from "./router";
 
 ReactDOM.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <React.Suspense fallback={<>...</>}>
-        <AppRouters />
-      </React.Suspense>
-    </BrowserRouter>
-  </React.StrictMode>,
+  // <React.StrictMode>
+  <BrowserRouter>
+    <React.Suspense fallback={<>...</>}>
+      <AppRouters />
+    </React.Suspense>
+  </BrowserRouter>,
+  // </React.StrictMode>
   document.getElementById("root")
 );

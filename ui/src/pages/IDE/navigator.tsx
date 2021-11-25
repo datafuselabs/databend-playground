@@ -1,7 +1,7 @@
 // Copyright 2020 Datafuse Labs.
 
 import { FC, useEffect, useState, ReactElement } from "react";
-import { Select, Input, Space, Tree, Row, Col, message, Button, Spin } from "antd";
+import { Select, Input, Space, Tree, Row, Col, message, Button } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import SpinLoading from "@/components/Loading/SpinLoading";
 import styles from "./css_navigator.module.scss";
@@ -167,7 +167,7 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
               <Button onClick={onRefresh} className={styles.refreshBtn} type="primary" icon={<RefreshSvg />}></Button>
             </Col>
           </Row>
-          <Tree onExpand={onExpand} expandedKeys={expandedKeys} showLine={showLine} switcherIcon={<DownOutlined />} treeData={treeData} />
+          <Tree onExpand={onExpand} expandedKeys={expandedKeys} height={1000} showLine={showLine} switcherIcon={<DownOutlined />} treeData={treeData} />
         </SpinLoading>
       </div>
     </>
