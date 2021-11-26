@@ -19,6 +19,7 @@ import "codemirror/addon/edit/matchbrackets.js";
 import "codemirror/addon/fold/foldgutter.js";
 import "codemirror/addon/fold/foldgutter.css";
 import "codemirror/addon/selection/active-line";
+import "codemirror/addon/display/placeholder.js";
 
 import EditSvg from "@/assets/svg/edit";
 import ExecuteSvg from "@/assets/svg/execute";
@@ -210,6 +211,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
               value={statement}
               options={{
                 mode: "sql",
+                placeholder: "Example: SELECT * FROM system.tables;",
                 matchBrackets: true,
                 styleActiveLine: true,
                 autoCloseBrackets: true,
@@ -238,8 +240,8 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
               }}
               onCursor={(editor, data): void => {
                 let sql: string = "";
-                let semiSymbol = ";";
-                let cursorPosition = { line: data.line, ch: data.ch };
+                const semiSymbol = ";";
+                const cursorPosition = { line: data.line, ch: data.ch };
                 // get the SQL statement before the current location (up to the last semicolon)
                 const beforeSemicolon = editor.getRange({ line: 0, ch: 0 }, cursorPosition);
                 // get the SQL statement after getting the current location (up to the next semicolon)

@@ -14,3 +14,14 @@
     justify-content: center;
   }
 }
+.coppy {
+  position: absolute;
+  color: #1890ff;
+  display: none;
+  z-index: 1;
+  font-size: 10px;
+  > span {
+    display: flex;
+    flex-direction: column;
+  }
+}

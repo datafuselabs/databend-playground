@@ -1,29 +1,34 @@
 // Copyright 2020 Datafuse Labs.
 
-import { FC, useEffect, useState, ReactElement } from "react";
+import { FC, useEffect, useState, ReactElement, useRef } from "react";
 import { Select, Input, Space, Tree, Row, Col, message, Button } from "antd";
+import * as _ from "lodash";
 import { DownOutlined } from "@ant-design/icons";
 import SpinLoading from "@/components/Loading/SpinLoading";
 import styles from "./css_navigator.module.scss";
+import RefreshSvg from "@/assets/svg/refresh";
 import DatabaseSvg from "@/assets/svg/database";
 import { getSqlStatement } from "@/apis/sql";
-const { Option } = Select;
-import * as _ from "lodash";
 import { IFields, ITableColumn, ITableInfo } from "@/types/sql";
-import RefreshSvg from "@/assets/svg/refresh";
+import { useMousePosition } from "@/hooks/useMousePosition";
+import CopySvg from "@/assets/svg/copy";
 import { killConnected } from "./utils";
+
+const { Option } = Select;
 interface Iprops {
   getTreeData: (e: Array<any>) => void;
 }
 const GET_ALL_DATABASE = `SELECT * FROM system.databases;`;
 let backUpData: any[] = [];
 const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
+  const mousePosition = useMousePosition();
   const [database, setDatabase] = useState<Array<string>>([]);
   const [treeData, setTreeData] = useState<ITableInfo[]>([]);
   const [showLine, setShowLine] = useState<boolean | { showLeafIcon: boolean }>(false);
   const [selectDefaultDatabase, setSelectDefaultDatabase] = useState<string>("");
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
   const [loadDatabase, setLoadDatabase] = useState<boolean>(false);
+  const coppyRef = useRef(null);
   // swich database
   const handleDbChange = (value: string): void => {
     setLoadDatabase(true);
@@ -97,6 +102,27 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
       setExpandedKeys([]);
     }
   };
+  /**
+   * tree click
+   * @param selectedKeys
+   * @param e
+   */
+  const onTreeSelect = (selectedKeys: any, e: any): void => {
+    if (coppyRef.current) {
+      let style = coppyRef.current["style"] as any;
+      style.left = mousePosition.x + 50 + "px";
+      style.top = mousePosition.y - 30 + "px";
+      style.transation = "2s";
+      style.display = "block";
+      let timeId = setTimeout(() => {
+        style.display = "none";
+        clearTimeout(timeId);
+      }, 200);
+    }
+    let node = e.node;
+    let { title, name } = node;
+    navigator.clipboard.writeText(name ? name : title);
+  };
   useEffect(() => {
     getAllDatabase();
   }, []);
@@ -139,6 +165,12 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
   }
   return (
     <>
+      <div ref={coppyRef} className={styles.coppy}>
+        <span>
+          <CopySvg></CopySvg>
+          <span> Copied</span>
+        </span>
+      </div>
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
         <Row>
           <Col span={3}>
@@ -167,7 +199,7 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
               <Button onClick={onRefresh} className={styles.refreshBtn} type="primary" icon={<RefreshSvg />}></Button>
             </Col>
           </Row>
-          <Tree onExpand={onExpand} expandedKeys={expandedKeys} height={1000} showLine={showLine} switcherIcon={<DownOutlined />} treeData={treeData} />
+          <Tree onSelect={onTreeSelect} onExpand={onExpand} expandedKeys={expandedKeys} height={1000} showLine={showLine} switcherIcon={<DownOutlined />} treeData={treeData} />
         </SpinLoading>
       </div>
     </>

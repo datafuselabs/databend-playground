@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { VariableSizeGrid as Grid } from "react-window";
 import ResizeObserver from "rc-resize-observer";
+import { Table, Popover } from "antd";
 import classNames from "classnames";
-import { Table } from "antd";
 
 export default function VirtualTable(props: Parameters<typeof Table>[0]) {
   const { columns, scroll } = props;
@@ -65,17 +65,21 @@ export default function VirtualTable(props: Parameters<typeof Table>[0]) {
           onScroll({ scrollLeft });
         }}
       >
-        {({ columnIndex, rowIndex, style }: { columnIndex: number; rowIndex: number; style: React.CSSProperties }) => (
-          <div
-            title={(rawData[rowIndex] as any)[(mergedColumns as any)[columnIndex].dataIndex]}
-            className={classNames("virtual-table-cell", {
-              "virtual-table-cell-last": columnIndex === mergedColumns.length - 1,
-            })}
-            style={style}
-          >
-            {(rawData[rowIndex] as any)[(mergedColumns as any)[columnIndex].dataIndex]}
-          </div>
-        )}
+        {({ columnIndex, rowIndex, style }: { columnIndex: number; rowIndex: number; style: React.CSSProperties }) => {
+          const co = (rawData[rowIndex] as any)[(mergedColumns as any)[columnIndex].dataIndex];
+          return (
+            <div
+              className={classNames("virtual-table-cell", {
+                "virtual-table-cell-last": columnIndex === mergedColumns.length - 1,
+              })}
+              style={style}
+            >
+              <Popover overlayStyle={{ maxWidth: "500px" }} placement="topLeft" title="Complete content" content={co}>
+                <span>{co}</span>
+              </Popover>
+            </div>
+          );
+        }}
       </Grid>
     );
   };
