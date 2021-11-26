@@ -12,7 +12,6 @@ import { getSqlStatement } from "@/apis/sql";
 import { IFields, ITableColumn, ITableInfo } from "@/types/sql";
 import { useMousePosition } from "@/hooks/useMousePosition";
 import CopySvg from "@/assets/svg/copy";
-import { killConnected } from "./utils";
 
 const { Option } = Select;
 interface Iprops {
@@ -57,7 +56,7 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
     setLoadDatabase(true);
     getSqlStatement(GET_ALL_DATABASE)
       .then(response => {
-        const { error, data, final_uri } = response;
+        const { error, data } = response;
         if (error) {
           message.warning(error);
           return;
@@ -74,9 +73,6 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
           handleDbChange(e);
         }
         setExpandedKeys([]);
-        if (final_uri) {
-          killConnected(final_uri);
-        }
       })
       .finally(() => {
         setLoadDatabase(false);

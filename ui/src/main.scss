@@ -41,6 +41,9 @@
 .ant-menu-title-content {
   padding-left: 5px;
 }
+.ant-tree-title {
+  color: #3f4246;
+}
 .ant-menu-inline-collapsed {
   .ant-menu-title-content {
     display: none;
@@ -58,6 +61,15 @@
   border-bottom: 1px solid #e8e8e8;
   @include ellipsis;
 }
+// .ant-table-cell {
+//   &:first-child {
+//     width: 100px;
+//     position: absolute;
+//     left: 0;
+//     top: 0;
+//     z-index: 1;
+//   }
+// }
 .virtualTable .ant-table-tbody > tr > td > div {
   box-sizing: border-box;
   width: 100%;
@@ -69,10 +81,6 @@
 }
 .CodeMirror-linenumbers {
   background-color: #fff;
-}
-.ͼ2 .cm-gutters {
-  background-color: #fff;
-  border-right: 1px solid #eee;
 }
 .CodeMirror-activeline-background {
   background: #d7e6f9 !important;

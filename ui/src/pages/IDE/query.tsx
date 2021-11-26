@@ -4,7 +4,6 @@ import { FC, ReactElement, useState, useEffect } from "react";
 import { Button } from "antd";
 import { Controlled as CodeMirror } from "react-codemirror2";
 import "codemirror/lib/codemirror.css";
-import "codemirror/addon/fold/foldgutter.js";
 import "codemirror/addon/fold/foldcode.js";
 import "codemirror/addon/fold/brace-fold.js";
 import "codemirror/addon/fold/comment-fold.js";
@@ -56,7 +55,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
   const RUNNING = "Running...";
   let timerId: any = 0;
   const [cancelUrl, setCancelUrl] = useState(""); // cache final_uri
-  const [statement, setStatement] = useState<string>("");
+  const [statement, setStatement] = useState<string>("select * from system.tables;");
   const [tableData, setTableData] = useState<Array<any>>([]);
   const [time, setTime] = useState<number>(0);
   const [readRows, setReadRows] = useState<number>(0);
@@ -80,14 +79,23 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
    */
   function processColumns(data: IStatementResponse) {
     let len = data.columns.fields.length;
-    return data.columns.fields.map(function (field, idx) {
+    let columns = data.columns.fields.map(function (field, idx) {
       return {
         title: field.name,
         key: field.name,
         dataIndex: idx,
-        width: len < 8 ? null : 170,
+        width: len < 9 ? null : 170,
       };
     });
+    return [
+      {
+        title: "Row.",
+        width: 100,
+        render: true,
+        // fixed: "left",
+      },
+      ...columns,
+    ];
   }
   /**
    * show error board kanban

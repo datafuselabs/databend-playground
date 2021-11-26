@@ -66,7 +66,13 @@ export default function VirtualTable(props: Parameters<typeof Table>[0]) {
         }}
       >
         {({ columnIndex, rowIndex, style }: { columnIndex: number; rowIndex: number; style: React.CSSProperties }) => {
-          const co = (rawData[rowIndex] as any)[(mergedColumns as any)[columnIndex].dataIndex];
+          let co = "";
+          let isLineNumber = mergedColumns[columnIndex].render;
+          if (isLineNumber) {
+            co = String(rowIndex + 1);
+          } else {
+            co = (rawData[rowIndex] as any)[(mergedColumns as any)[columnIndex].dataIndex];
+          }
           return (
             <div
               className={classNames("virtual-table-cell", {
@@ -74,16 +80,19 @@ export default function VirtualTable(props: Parameters<typeof Table>[0]) {
               })}
               style={style}
             >
-              <Popover overlayStyle={{ maxWidth: "500px" }} placement="topLeft" title="Complete content" content={co}>
+              {isLineNumber ? (
                 <span>{co}</span>
-              </Popover>
+              ) : (
+                <Popover overlayStyle={{ maxWidth: "500px" }} placement="topLeft" title="Complete content" content={co}>
+                  <span>{co}</span>
+                </Popover>
+              )}
             </div>
           );
         }}
       </Grid>
     );
   };
-
   return (
     <ResizeObserver
       onResize={({ width }) => {

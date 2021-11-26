@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 
-interface Imouse {
+interface IMouse {
   x: number,
   y: number
 }
-export const useMousePosition = (): Imouse => {
-  const [position, setPosition] = useState<Imouse>({ x: 0, y: 0 });
+export const useMousePosition = (): IMouse => {
+  const [position, setPosition] = useState<IMouse>({ x: 0, y: 0 });
 
   useEffect(() => {
     const setFromEvent = (e: MouseEvent) => setPosition({ x: e.clientX, y: e.clientY });
