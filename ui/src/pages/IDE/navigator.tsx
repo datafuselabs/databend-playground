@@ -108,7 +108,6 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
       let style = coppyRef.current["style"] as any;
       style.left = mousePosition.x + 50 + "px";
       style.top = mousePosition.y - 30 + "px";
-      style.transation = "2s";
       style.display = "block";
       let timeId = setTimeout(() => {
         style.display = "none";

@@ -78,8 +78,8 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
    * @returns
    */
   function processColumns(data: IStatementResponse) {
-    let len = data.columns.fields.length;
-    let columns = data.columns.fields.map(function (field, idx) {
+    const len = data.columns.fields.length;
+    const columns = data.columns.fields.map(function (field: { name: any }, idx: number) {
       return {
         title: field.name,
         key: field.name,
@@ -87,15 +87,16 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
         width: len < 9 ? null : 170,
       };
     });
-    return [
-      {
-        title: "Row.",
-        width: 100,
-        render: true,
-        // fixed: "left",
-      },
-      ...columns,
-    ];
+    return columns;
+    // return [
+    //   {
+    //     title: "Row.",
+    //     width: 100,
+    //     render: true,
+    //     // fixed: "left",
+    //   },
+    //   ...columns,
+    // ];
   }
   /**
    * show error board kanban
@@ -129,7 +130,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
             }
           }
         })
-        .catch(error => {
+        .catch((error: any) => {
           clearInterval(timerId);
           killConnected(final_uri);
           showInfo(error);
