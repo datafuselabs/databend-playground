@@ -84,19 +84,17 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
         title: field.name,
         key: field.name,
         dataIndex: idx,
-        width: len < 9 ? null : 170,
+        width: len < 7 ? null : 170,
       };
     });
-    return columns;
-    // return [
-    //   {
-    //     title: "Row.",
-    //     width: 100,
-    //     render: true,
-    //     // fixed: "left",
-    //   },
-    //   ...columns,
-    // ];
+    return [
+      {
+        title: "No.",
+        width: 80,
+        render: true,
+      },
+      ...columns,
+    ];
   }
   /**
    * show error board kanban

@@ -61,15 +61,6 @@
   border-bottom: 1px solid #e8e8e8;
   @include ellipsis;
 }
-// .ant-table-cell {
-//   &:first-child {
-//     width: 100px;
-//     position: absolute;
-//     left: 0;
-//     top: 0;
-//     z-index: 1;
-//   }
-// }
 .virtualTable .ant-table-tbody > tr > td > div {
   box-sizing: border-box;
   width: 100%;
