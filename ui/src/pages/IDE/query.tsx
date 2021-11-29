@@ -130,7 +130,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
         })
         .catch((error: any) => {
           clearInterval(timerId);
-          killConnected(final_uri);
+          killConnected(final_uri + "/g");
           showInfo(error);
         });
     }, 1000);
@@ -147,6 +147,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
     let rows: any = [];
     let read_bytes_total: number = 0;
     let read_rows_total: number = 0;
+    let wall_time_ms: number = 0;
     const response: IStatementResponse = await getSqlQuery({
       sql: selectionValue ? selectionValue : statement,
     });
@@ -155,6 +156,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
     stats_uri && updateProgress(stats_uri, final_uri);
     read_bytes_total = (stats.progress && stats.progress.read_bytes) || 0;
     read_rows_total = (stats.progress && stats.progress.read_rows) || 0;
+    wall_time_ms = stats.wall_time_ms || 0;
     if (error) {
       setExecuteDisabled(false);
       showInfo(error);
@@ -179,11 +181,19 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
 
         read_bytes_total += (stats.progress && stats.progress.read_bytes) || 0;
         read_rows_total += (stats.progress && stats.progress.read_rows) || 0;
+        wall_time_ms += stats.wall_time_ms || 0;
         rows = [...rows, ...data];
       }
+      // Ten thousand were artificially processed
+      let len = rows.length ?? 0;
+      if (len > TARGET_NUMBER) {
+        len = TARGET_NUMBER;
+        rows = rows.slice(0, TARGET_NUMBER);
+      }
       setTableData(rows);
-      setReadRows(read_rows_total);
+      setReadRows(len);
       setReadBytes(read_bytes_total);
+      setTime(wall_time_ms);
       setExecuteDisabled(false);
     } catch (error) {
       setExecuteDisabled(false);

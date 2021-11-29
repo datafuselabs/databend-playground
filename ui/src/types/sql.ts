@@ -14,6 +14,7 @@ export interface IStatementResponse {
   };
   error: string,
   stats: {
+    wall_time_ms: number;
     progress: {
       read_bytes: number;
       read_rows: number;

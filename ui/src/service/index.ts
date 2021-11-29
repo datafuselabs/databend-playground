@@ -19,12 +19,8 @@ axiosInstance.interceptors.response.use(
   },
   // error
   (error: any) => {
-    const { response } = error;
-    if (response) {
-      return Promise.reject(response.data);
-    } else {
-      message.error('network error, try again later.');
-    }
+    const errorMessage = String(error);
+    message.error(errorMessage)
   }
 );
 
