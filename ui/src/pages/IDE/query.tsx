@@ -130,7 +130,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
         })
         .catch((error: any) => {
           clearInterval(timerId);
-          killConnected(final_uri + "/g");
+          killConnected(final_uri);
           showInfo(error);
         });
     }, 1000);
