@@ -18,11 +18,14 @@ import { BrowserRouter } from "react-router-dom";
 import "antd/dist/antd.css";
 import "./main.scss";
 import { AppRouters } from "./router";
-
+const DATABEND = `Databend is an elastic and reliable Cloud Data Warehouse,
+offers Blazing Fast Query and combines Elasticity, Simplicity,
+Low cost of the Cloud, built to make
+the Data Cloud easy.`;
 ReactDOM.render(
   // <React.StrictMode>
   <BrowserRouter>
-    <React.Suspense fallback={<>...</>}>
+    <React.Suspense fallback={<>...{DATABEND}</>}>
       <AppRouters />
     </React.Suspense>
   </BrowserRouter>,
