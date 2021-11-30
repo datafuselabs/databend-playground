@@ -21,11 +21,13 @@ use crate::handlers::asset_handler;
 use crate::handlers::index_handler;
 use crate::handlers::proxy_handler;
 use crate::handlers::HttpProxyOptions;
-use axum::handler::get;
-use axum::handler::post;
-use axum::AddExtensionLayer;
-use axum::Router;
 use clap::Parser;
+use poem::get;
+use poem::listener::TcpListener;
+use poem::post;
+use poem::EndpointExt;
+use poem::Route;
+use poem::Server;
 use tokio;
 use tracing_subscriber;
 
@@ -49,11 +51,11 @@ async fn main() -> Result<()> {
     let proxy_options = HttpProxyOptions {
         base_api: opts.bend_http_api.clone(),
     };
-    let app = Router::new()
-        .route("/v1/statement", post(proxy_handler))
-        .layer(AddExtensionLayer::new(proxy_options))
-        .route("/", get(index_handler))
-        .route("/assets/:path", get(asset_handler));
+    let app = Route::new()
+        .at("/", get(index_handler))
+        .at("/assets/:path", get(asset_handler))
+        .at("/v1/*path", post(proxy_handler).get(proxy_handler))
+        .data(proxy_options);
 
     let sock_addr: std::net::SocketAddr = opts
         .listen_addr
@@ -61,8 +63,8 @@ async fn main() -> Result<()> {
         .map_err(|_| Error::ArgumentError(format!("Bad listen addr: {}", opts.listen_addr)))?;
     tracing::info!("listening on {}", sock_addr);
 
-    axum::Server::bind(&sock_addr)
-        .serve(app.into_make_service())
+    Server::new(TcpListener::bind(&sock_addr))
+        .run(app)
         .await
         .map_err(|err| Error::ArgumentError(format!("Start serve failed, cause: {}", err)))?;
 

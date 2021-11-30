@@ -12,28 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use axum::body::Bytes;
-use axum::body::Full;
-use axum::extract;
-use axum::http::header;
-use axum::http::header::HeaderValue;
-use axum::http::Response;
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
 use include_dir::include_dir;
 use include_dir::Dir;
+use poem::handler;
+use poem::http::header;
+use poem::http::header::HeaderValue;
+use poem::http::StatusCode;
+use poem::web::Path;
+use poem::IntoResponse;
+use poem::Response;
 
 const ASSETS_DIR: Dir = include_dir!("./ui/dist");
 
-pub async fn asset_handler(extract::Path(path): extract::Path<String>) -> impl IntoResponse {
+#[handler]
+pub async fn asset_handler(Path(path): Path<String>) -> Response {
     serve_static_asset(format!("assets/{}", path))
 }
 
+#[handler]
 pub async fn index_handler() -> impl IntoResponse {
     serve_static_asset(format!("index.html"))
 }
 
-fn serve_static_asset(path: String) -> Response<Full<Bytes>> {
+fn serve_static_asset(path: String) -> Response {
     let file = match ASSETS_DIR.get_file(&path) {
         None => return (StatusCode::NOT_FOUND, "Not found").into_response(),
         Some(file) => file,
@@ -51,6 +52,5 @@ fn serve_static_asset(path: String) -> Response<Full<Bytes>> {
     Response::builder()
         .status(StatusCode::OK)
         .header(header::CONTENT_TYPE, content_type)
-        .body(Full::from(buffer))
-        .unwrap()
+        .body(buffer)
 }
