@@ -115,7 +115,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
    * @param stats_uri
    * @param final_uri
    */
-  function updateProgress(stats_uri: string, final_uri: string) {
+  const updateProgress = (stats_uri: string, final_uri: string) => {
     timerId = setInterval(() => {
       getSqlStatus(stats_uri)
         .then(({ state, error }) => {
@@ -134,7 +134,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
           showInfo(error);
         });
     }, 1000);
-  }
+  };
 
   /***
    * execute sql
@@ -195,6 +195,9 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
       setReadBytes(read_bytes_total);
       setTime(wall_time_ms);
       setExecuteDisabled(false);
+      // The quantity is reached or nothing more，Release resources
+      clearInterval(timerId);
+      killConnected(final_uri);
     } catch (error) {
       setExecuteDisabled(false);
       showInfo(error);
@@ -285,7 +288,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
             </div>
             <div className={styles.indicators}>
               <TimeSvg></TimeSvg>
-              <span>Time:{time < 100 ? time + "ms" : time / 1000 + "s"}</span>
+              <span>Time:{time < 1000 ? time + "ms" : time / 1000 + "s"}</span>
             </div>
             <div className={styles.indicators}>
               <StorageSvg></StorageSvg>
