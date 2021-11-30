@@ -12,6 +12,7 @@ import { getSqlStatement } from "@/apis/sql";
 import { IFields, ITableColumn, ITableInfo } from "@/types/sql";
 import { useMousePosition } from "@/hooks/useMousePosition";
 import CopySvg from "@/assets/svg/copy";
+import { copyToClipboard } from "@/utils/tools";
 
 const { Option } = Select;
 interface Iprops {
@@ -116,7 +117,7 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
     }
     let node = e.node;
     let { title, name } = node;
-    navigator.clipboard.writeText(name ? name : title);
+    copyToClipboard(name ? name : title);
   };
   useEffect(() => {
     getAllDatabase();
