@@ -2,7 +2,7 @@
 
 import { FC, useEffect, useState, ReactElement, useRef } from "react";
 import { Select, Input, Space, Tree, Row, Col, message, Button } from "antd";
-import * as _ from "lodash";
+import { chain, filter, cloneDeep } from "lodash";
 import { DownOutlined } from "@ant-design/icons";
 import SpinLoading from "@/components/Loading/SpinLoading";
 import styles from "./css_navigator.module.scss";
@@ -87,7 +87,7 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
   const onSearch = (e: any): void => {
     let { value } = e.target;
     value = value.trim();
-    const result = _.filter(backUpData, item => {
+    const result = filter(backUpData, item => {
       return item.key.includes(value);
     });
     const groupResult = groupList(result);
@@ -129,7 +129,7 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
     });
   }
   function groupList(dataList: Array<any>) {
-    let groupedItems = _(dataList)
+    let groupedItems = chain(dataList)
       .groupBy(item => item.table)
       .map((items, table) => {
         return {
@@ -154,7 +154,7 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
       tempObj["key"] = `${item[2]}-${item[0]}`;
       dataList.push(tempObj);
     });
-    backUpData = _.cloneDeep(dataList);
+    backUpData = cloneDeep(dataList);
     getTreeData(backUpData);
     return groupList(dataList);
   }
