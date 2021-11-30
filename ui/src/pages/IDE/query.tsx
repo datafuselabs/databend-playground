@@ -55,7 +55,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
   const RUNNING = "Running...";
   let timerId: any = 0;
   const [cancelUrl, setCancelUrl] = useState(""); // cache final_uri
-  const [statement, setStatement] = useState<string>("select * from system.tables;");
+  const [statement, setStatement] = useState<string>("");
   const [tableData, setTableData] = useState<Array<any>>([]);
   const [time, setTime] = useState<number>(0);
   const [readRows, setReadRows] = useState<number>(0);
