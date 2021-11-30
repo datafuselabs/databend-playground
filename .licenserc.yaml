@@ -26,6 +26,7 @@ header:
     - "**/*.json"
     - "**/*.svg"
     - "**/*.html"
+    - "ui/"
     - "rust-toolchain"
     - "rustfmt.toml"
     - "**/*.proto"
