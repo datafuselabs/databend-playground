@@ -12,13 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use axum::body::Bytes;
-use axum::body::Full;
-use axum::http::Response;
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
+use poem::http::StatusCode;
+use poem::IntoResponse;
+use poem::Response;
 use serde_json::json;
-use std::convert::Infallible;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -40,18 +37,12 @@ impl std::fmt::Display for Error {
 }
 
 impl IntoResponse for Error {
-    type Body = Full<Bytes>;
-    type BodyError = Infallible;
-
-    fn into_response(self) -> Response<Self::Body> {
+    fn into_response(self) -> Response {
         let (status, output) = match self {
             Error::InternalError(s) => (StatusCode::INTERNAL_SERVER_ERROR, json!({ "message": s })),
             Error::ArgumentError(s) => (StatusCode::BAD_REQUEST, json!({ "message": s })),
         };
 
-        Response::builder()
-            .status(status)
-            .body(Full::from(output.to_string()))
-            .unwrap()
+        Response::builder().status(status).body(output.to_string())
     }
 }
