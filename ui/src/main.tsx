@@ -14,7 +14,7 @@
 
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 import "antd/dist/antd.css";
 import "./main.scss";
 import { AppRouters } from "./router";
@@ -24,11 +24,11 @@ Low cost of the Cloud, built to make
 the Data Cloud easy.`;
 ReactDOM.render(
   // <React.StrictMode>
-  <BrowserRouter>
+  <HashRouter>
     <React.Suspense fallback={<>...{DATABEND}</>}>
       <AppRouters />
     </React.Suspense>
-  </BrowserRouter>,
+  </HashRouter>,
   // </React.StrictMode>
   document.getElementById("root")
 );
