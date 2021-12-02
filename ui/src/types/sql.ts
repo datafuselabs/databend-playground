@@ -5,12 +5,13 @@ export interface IStatementResponse {
   next_uri: string;
   state: string;
   data: Array<Array<any>>;
-  columns: {
+  schema: {
     fields: Array<{
       name: string;
       data_type: string;
       nullable: boolean;
     }>;
+    metadata: any;
   };
   error: string,
   stats: {

@@ -78,13 +78,13 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
    * @returns
    */
   function processColumns(data: IStatementResponse) {
-    const len = data.columns.fields.length;
-    const columns = data.columns.fields.map(function (field: { name: any }, idx: number) {
+    const len = data.schema.fields.length;
+    const columns = data.schema.fields.map(function (field: { name: any }, idx: number) {
       return {
         title: field.name,
         key: field.name,
         dataIndex: idx,
-        width: len < 7 ? null : 170,
+        width: len < 8 ? null : 170,
       };
     });
     return [
