@@ -35,12 +35,12 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
     setSelectDefaultDatabase(value);
     getSqlStatement(`SELECT * FROM system.columns where database = '${value}';`)
       .then(response => {
-        const { columns, data, error } = response;
+        const { schema, data, error } = response;
         if (error) {
           message.warning(error);
           return;
         }
-        const { fields } = columns;
+        const { fields } = schema;
         const keys: Array<string> = processFields(fields || []);
         const json: ITableInfo[] = processData(keys, data);
         setTreeData(json);
