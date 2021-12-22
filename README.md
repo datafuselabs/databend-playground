@@ -21,7 +21,7 @@ make ui-debug
 
 ## Contributing
 
-You can learn more about contributing to the Datafuse project by reading our [Contribution Guide](https://databend.rs/development/contributing/) and by viewing our [Code of Conduct](https://databend.rs/policies/code-of-conduct/).
+You can learn more about contributing to the Datafuse project by reading our [Contribution Guide](https://databend.rs/dev/contributing/) and by viewing our [Code of Conduct](https://databend.rs/dev/policies/code-of-conduct).
 
 ## License
 
