@@ -24,15 +24,28 @@
       }
     }
     .sqlCodeMirror {
-      height: 220px;
       margin-top: 10px;
       border: 1px solid #ccc;
+      position: relative;
+      .scale{
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+      }
+    }
+    .sqlCodeMirrorH1 {
+      height: 220px;
+      transition-duration: 0.215s;
+    }
+    .sqlCodeMirrorH2 {
+      height: 76vh;
     }
   }
   .tableArea {
     overflow-y: auto;
     .tableTips {
-      padding: 10px 0;
+      padding-bottom: 10px;
       display: flex;
       > div {
         display: flex;

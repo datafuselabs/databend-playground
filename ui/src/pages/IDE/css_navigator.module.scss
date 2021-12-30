@@ -2,8 +2,6 @@
   border-top: 1px solid #ccc;
   margin-top: 10px;
   padding-top: 10px;
-  height: 90%;
-  overflow-y: auto;
   .searchInput {
     margin-top: 10px;
     margin-bottom: 20px;
@@ -15,7 +13,7 @@
   }
 }
 .coppy {
-  position: absolute;
+  position: fixed;
   color: #1890ff;
   display: none;
   z-index: 1;

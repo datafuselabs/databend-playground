@@ -2,6 +2,7 @@
 
 import { FC, ReactElement, useState, useEffect } from "react";
 import { Button } from "antd";
+import clsx from "clsx";
 import { Controlled as CodeMirror } from "react-codemirror2";
 import "codemirror/lib/codemirror.css";
 import "codemirror/addon/fold/foldcode.js";
@@ -20,23 +21,18 @@ import "codemirror/addon/fold/foldgutter.css";
 import "codemirror/addon/selection/active-line";
 import "codemirror/addon/display/placeholder.js";
 
-import EditSvg from "@/assets/svg/edit";
-import ExecuteSvg from "@/assets/svg/execute";
-import TableSvg from "@/assets/svg/table";
-import TimeSvg from "@/assets/svg/time";
 import styles from "./css_query.module.scss";
-import StorageSvg from "@/assets/svg/storage";
 import SorrySvg from "@/assets/svg/sorry";
-import ResultSvg from "@/assets/svg/result";
-import QuerySvg from "@/assets/svg/query";
 import NoDataFragment from "@/components/NoData";
 import VirtualTable from "@/components/VitualTable";
 import Progress from "@/components/Progress";
-import { getSqlNextStatement, getSqlQuery, getSqlStatus } from "@/apis/sql";
+import { getSqlNextStatement, getSqlQuery, getSqlStatus, getSqlQueryToken } from "@/apis/sql";
 import { IColumn, IStatementResponse } from "@/types/sql";
 import { filterSize } from "@/utils/math";
 import { showInfo } from "@/utils/tools";
 import { killConnected } from "./utils";
+import IconFont from "@/assets/scss/icon";
+import Scale from "@/components/Scale";
 
 let winTableCodeTips = {}; // global table tips;
 interface IProps {
@@ -55,7 +51,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
   const RUNNING = "Running...";
   let timerId: any = 0;
   const [cancelUrl, setCancelUrl] = useState(""); // cache final_uri
-  const [statement, setStatement] = useState<string>("");
+  const [statement, setStatement] = useState<string>("SELECT * FROM system.tables;");
   const [tableData, setTableData] = useState<Array<any>>([]);
   const [time, setTime] = useState<number>(0);
   const [readRows, setReadRows] = useState<number>(0);
@@ -66,6 +62,8 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
   const [showError, setShowError] = useState(false);
   const [sqlError, setSqlError] = useState<IQueryError | any>({});
   const [selectionValue, setSelectionValue] = useState("");
+  const [isLargeTable, setIsLargeTable] = useState(false);
+  const [isLargeSql, setIsLargeSql] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -144,30 +142,32 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
     setExecuteText(RUNNING);
     setTableData([]);
     setShowError(false);
+    setCancelUrl("");
     let rows: any = [];
-    let read_bytes_total: number = 0;
-    let read_rows_total: number = 0;
-    let wall_time_ms: number = 0;
-    const response: IStatementResponse = await getSqlQuery({
-      sql: selectionValue ? selectionValue : statement,
-    });
-    let { final_uri, data, next_uri, error, stats_uri, stats } = response;
-    setCancelUrl(final_uri);
-    stats_uri && updateProgress(stats_uri, final_uri);
-    read_bytes_total = (stats.progress && stats.progress.read_bytes) || 0;
-    read_rows_total = (stats.progress && stats.progress.read_rows) || 0;
-    wall_time_ms = stats.wall_time_ms || 0;
-    if (error) {
-      setExecuteDisabled(false);
-      showInfo(error);
-      showErrorBoard(error);
-      return;
-    } else {
-      rows = data;
-      const columns: IColumn[] = processColumns(response);
-      setTableColumns(columns);
-    }
+    let read_bytes_total = 0;
+    // let read_rows_total = 0;
+    let wall_time_ms = 0;
     try {
+      const response: IStatementResponse = await getSqlQuery({
+        sql: selectionValue ? selectionValue : statement,
+      });
+      const { final_uri, data, error, stats_uri, stats } = response;
+      let { next_uri } = response;
+      setCancelUrl(final_uri);
+      stats_uri && updateProgress(stats_uri, final_uri);
+      read_bytes_total = (stats.progress && stats.progress.read_bytes) || 0;
+      // read_rows_total = (stats.progress && stats.progress.read_rows) || 0;
+      wall_time_ms = stats.wall_time_ms || 0;
+      if (error) {
+        setExecuteDisabled(false);
+        showInfo(error);
+        showErrorBoard(error);
+        return;
+      } else {
+        rows = data;
+        const columns: IColumn[] = processColumns(response);
+        setTableColumns(columns);
+      }
       while (next_uri && rows.length < TARGET_NUMBER) {
         const nextResponse = await getSqlNextStatement(next_uri);
         const { data, error, stats } = nextResponse;
@@ -180,7 +180,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
         next_uri = nextResponse.next_uri;
 
         read_bytes_total += (stats.progress && stats.progress.read_bytes) || 0;
-        read_rows_total += (stats.progress && stats.progress.read_rows) || 0;
+        // read_rows_total += (stats.progress && stats.progress.read_rows) || 0;
         wall_time_ms += stats.wall_time_ms || 0;
         rows = [...rows, ...data];
       }
@@ -207,7 +207,12 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
    * cancel execute sql
    */
   const cancel = () => {
-    killConnected(cancelUrl);
+    if (cancelUrl) {
+      killConnected(cancelUrl);
+    }
+    if (!cancelUrl) {
+      getSqlQueryToken("getSqlQuery: /v1/query cancel");
+    }
     setExecuteDisabled(false);
     updateProgressUi("Cancelled");
     clearInterval(timerId);
@@ -215,18 +220,19 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
   return (
     <>
       <div className={styles.sqlIde}>
-        <div className={styles.topArea}>
+        <div className={styles.topArea} style={{ display: isLargeTable ? "none" : "block" }}>
           <div className={styles.topTitle}>
             <span className={styles.tips}>
-              <EditSvg></EditSvg>
+              <IconFont type="databend-edit" style={{ fontSize: "25px" }}></IconFont>
               <span>Query</span>
             </span>
             <Button disabled={executeDisabled} type="primary" onClick={executeSql} className={styles.execButton}>
-              <ExecuteSvg />
+              <IconFont type="databend-zhihang" style={{ fontSize: "20px" }}></IconFont>
               Execute
             </Button>
           </div>
-          <div className={styles.sqlCodeMirror}>
+          <div className={clsx(styles.sqlCodeMirror, isLargeSql ? styles.sqlCodeMirrorH2 : styles.sqlCodeMirrorH1)}>
+            <Scale className={styles.scale} onClick={() => setIsLargeSql(!isLargeSql)} isLarge={isLargeSql}></Scale>
             <CodeMirror
               value={statement}
               options={{
@@ -253,13 +259,13 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
                 editor.showHint();
               }}
               onCursorActivity={editor => {
-                let value = editor.getSelection();
+                const value = editor.getSelection();
                 if (value) {
                   setSelectionValue(value);
                 }
               }}
               onCursor={(editor, data): void => {
-                let sql: string = "";
+                let sql = "";
                 const semiSymbol = ";";
                 const cursorPosition = { line: data.line, ch: data.ch };
                 // get the SQL statement before the current location (up to the last semicolon)
@@ -280,30 +286,21 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
             />
           </div>
         </div>
-        <div className={styles.tableArea}>
+        <div className={styles.tableArea} style={{ display: isLargeSql ? "none" : "block" }}>
           <div className={styles.tableTips}>
             <div className={styles.indicators}>
-              <TableSvg></TableSvg>
+              <IconFont type="databend-table" style={{ fontSize: "25px" }}></IconFont>
               <span>Rows: {readRows}</span>
             </div>
             <div className={styles.indicators}>
-              <TimeSvg></TimeSvg>
-              <span>Time:{time < 1000 ? time + "ms" : time / 1000 + "s"}</span>
+              <IconFont type="databend-time" style={{ fontSize: "25px" }}></IconFont>
+              <span>Time: {time < 1000 ? time + "ms" : time / 1000 + "s"}</span>
             </div>
             <div className={styles.indicators}>
-              <StorageSvg></StorageSvg>
+              <IconFont type="databend-rongliang" style={{ fontSize: "25px" }}></IconFont>
               <span>{filterSize(readBytes)}</span>
             </div>
-            {/* <div className={styles.scaleBtn}>
-              <Button className={styles.queryBtn} shape="round" type="primary">
-                <QuerySvg />
-                Query
-              </Button>
-              <Button className={styles.resultBtn} shape="round" type="primary">
-                <ResultSvg />
-                Results
-              </Button>
-            </div> */}
+            <Scale className={styles.tableScale} onClick={() => setIsLargeTable(!isLargeTable)} isLarge={isLargeTable}></Scale>
           </div>
           {showError && (
             <div className={styles.errorBoard}>
@@ -316,7 +313,7 @@ const SqlQuery: FC<IProps> = ({ tableCodeTips }): ReactElement => {
             </div>
           )}
           {executeDisabled && <Progress cancel={cancel} executeText={executeText} className={styles.progress}></Progress>}
-          <div className={styles.virtualTable}>{tableData.length > 0 ? <VirtualTable dataSource={tableData} columns={tableColumns} scroll={{ y: 400, x: true }} /> : <NoDataFragment />}</div>
+          <div className={styles.virtualTable}>{tableData.length > 0 ? <VirtualTable dataSource={tableData} columns={tableColumns} scroll={{ y: isLargeTable ? 700 : 400, x: true }} /> : <NoDataFragment />}</div>
         </div>
       </div>
     </>

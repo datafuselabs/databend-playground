@@ -7,8 +7,25 @@
     min-height: 500px;
     height: 100%;
     width: 300px;
+    transition-duration: 0.215s;
     border-right: 1px solid #ccc;
     padding-right: 10px;
+    position: relative;
+    .databendShousuo{
+      transition-duration: .5s;
+      font-size: 40px;
+      position: absolute;
+      bottom: -25px;
+      right: -10px;
+      cursor: pointer;
+      z-index: 1;
+    }
+    .databendShousuoRight {
+      transform: rotate(180deg);
+    }
+  }
+  .navigatorW1 {
+    width: 0;
   }
   .content {
     flex: 1;

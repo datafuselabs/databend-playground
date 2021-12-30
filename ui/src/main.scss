@@ -1,24 +1,26 @@
+@import "./assets/scss/fonts.scss";
+html,
+body {
+  font-family: "Roboto", sans-serif;
+}
 #root {
   height: 100%;
   position: relative;
 }
-@mixin ellipsis($line: 1) {
-  @if $line==1 {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  } @else {
-    display: -webkit-box;
-    -webkit-line-clamp: $line;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.global-tree-area .ant-tree {
+  height: 70vh;
+  overflow-y: auto;
+}
+.ant-layout-sider-light {
+  border-right: 1px solid $databend-border-color;
 }
 .ant-layout-has-sider {
   height: 100%;
   position: absolute;
   width: 100%;
+}
+.ant-menu-inline {
+  border-right: none !important;
 }
 .site-layout-right {
   flex: 1;
@@ -27,6 +29,7 @@
   background: #fff;
 }
 .site-layout-header {
+  border-bottom: 1px solid $databend-border-color;
   .trigger {
     padding: 0 24px;
     font-size: 25px;
@@ -41,9 +44,6 @@
 .ant-menu-title-content {
   padding-left: 5px;
 }
-.ant-tree-title {
-  color: #3f4246;
-}
 .ant-menu-inline-collapsed {
   .ant-menu-title-content {
     display: none;
@@ -51,14 +51,19 @@
   .ant-menu-item {
     display: flex;
     svg {
-      transform: scale(1.8);
+      transform: scale(1.5);
     }
   }
 }
+.ant-layout-sider-light,
+.ant-menu-light {
+  background: $databend-menu-background-color !important;
+}
+// virtual table
 .virtual-table-cell {
   padding-left: 16px;
-  padding-top: 16px;
   border-bottom: 1px solid #e8e8e8;
+  line-height: 36px;
   @include ellipsis;
 }
 .virtualTable .ant-table-tbody > tr > td > div {
@@ -67,9 +72,12 @@
   @include ellipsis;
 }
 
-.CodeMirror {
-  height: 218px !important;
+// code mirror
+.CodeMirror,
+.react-codemirror2 {
+  height: 100% !important;
 }
+
 .CodeMirror-linenumbers {
   background-color: #fff;
 }
@@ -78,4 +86,13 @@
 }
 .CodeMirror-placeholder {
   color: #b2b2b2 !important;
+}
+
+// alibba front reset
+#databend-guanliyuan_jiaoseguanli,
+#databend-database,
+#databend-cluster {
+  path {
+    fill: currentColor;
+  }
 }

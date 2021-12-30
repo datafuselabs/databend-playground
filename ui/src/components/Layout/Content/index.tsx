@@ -10,9 +10,8 @@ export default class RightContent extends React.Component {
       <Content
         className="site-layout-background site-layout-content"
         style={{
-          overflowX: "auto",
-          margin: "24px 16px",
           padding: 24,
+          marginBottom: "8px",
           minHeight: 500,
         }}
       >

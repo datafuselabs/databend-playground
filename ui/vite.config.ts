@@ -38,5 +38,13 @@ export default defineConfig({
         changeOrigin: true,
       }
     }
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        charset: false,
+        additionalData: '@import "@/assets/scss/_mixins.scss";'
+      }
+    }
   }
 })

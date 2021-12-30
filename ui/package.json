@@ -10,6 +10,7 @@
     "@types/react-window": "^1.8.5",
     "antd": "^4.16.13",
     "axios": "^0.24.0",
+    "clsx": "^1.1.1",
     "codemirror": "^5.64.0",
     "lodash": "^4.17.21",
     "react": "^17.0.0",

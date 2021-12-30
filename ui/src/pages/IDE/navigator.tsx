@@ -3,28 +3,28 @@
 import { FC, useEffect, useState, ReactElement, useRef } from "react";
 import { Select, Input, Space, Tree, Row, Col, message, Button } from "antd";
 import { chain, filter, cloneDeep } from "lodash";
-import { DownOutlined } from "@ant-design/icons";
 import SpinLoading from "@/components/Loading/SpinLoading";
 import styles from "./css_navigator.module.scss";
 import RefreshSvg from "@/assets/svg/refresh";
-import DatabaseSvg from "@/assets/svg/database";
 import { getSqlStatement } from "@/apis/sql";
 import { IFields, ITableColumn, ITableInfo } from "@/types/sql";
 import { useMousePosition } from "@/hooks/useMousePosition";
-import CopySvg from "@/assets/svg/copy";
 import { copyToClipboard } from "@/utils/tools";
+import IconFont from "@/assets/scss/icon";
+import clsx from "clsx";
 
 const { Option } = Select;
 interface Iprops {
   getTreeData: (e: Array<any>) => void;
+  style?: any;
 }
-const GET_ALL_DATABASE = `SELECT * FROM system.databases;`;
+const GET_ALL_DATABASE = "SELECT * FROM system.databases;";
 let backUpData: any[] = [];
-const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
+const Navigator: FC<Iprops> = ({ getTreeData, style }): ReactElement => {
   const mousePosition = useMousePosition();
   const [database, setDatabase] = useState<Array<string>>([]);
   const [treeData, setTreeData] = useState<ITableInfo[]>([]);
-  const [showLine, setShowLine] = useState<boolean | { showLeafIcon: boolean }>(false);
+  const [showLine] = useState<boolean | { showLeafIcon: boolean }>(false);
   const [selectDefaultDatabase, setSelectDefaultDatabase] = useState<string>("");
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
   const [loadDatabase, setLoadDatabase] = useState<boolean>(false);
@@ -68,7 +68,7 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
           tempDatabase = [...tempDatabase, ...item];
         });
         if (tempDatabase.length > 0) {
-          let e = tempDatabase[0];
+          const e = tempDatabase[0];
           setDatabase(tempDatabase);
           setSelectDefaultDatabase(e);
           handleDbChange(e);
@@ -106,17 +106,17 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
    */
   const onTreeSelect = (selectedKeys: any, e: any): void => {
     if (coppyRef.current) {
-      let style = coppyRef.current["style"] as any;
+      const style = coppyRef.current["style"] as any;
       style.left = mousePosition.x + 50 + "px";
       style.top = mousePosition.y - 30 + "px";
       style.display = "block";
-      let timeId = setTimeout(() => {
+      const timeId = setTimeout(() => {
         style.display = "none";
         clearTimeout(timeId);
       }, 200);
     }
-    let node = e.node;
-    let { title, name } = node;
+    const node = e.node;
+    const { title, name } = node;
     copyToClipboard(name ? name : title);
   };
   useEffect(() => {
@@ -130,7 +130,7 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
     });
   }
   function groupList(dataList: Array<any>) {
-    let groupedItems = chain(dataList)
+    const groupedItems = chain(dataList)
       .groupBy(item => item.table)
       .map((items, table) => {
         return {
@@ -144,11 +144,11 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
   }
   // deal tableData
   function processData(keys: Array<string>, data: Array<Array<string>>): ITableInfo[] {
-    let dataList: Array<ITableColumn> = [];
+    const dataList: Array<ITableColumn> = [];
     data.map(item => {
-      let tempObj: any = {};
+      const tempObj: any = {};
       item.map((value, index) => {
-        let key = keys[index];
+        const key = keys[index];
         tempObj[key] = value;
       });
       tempObj["title"] = `${item[0]}(${item[3]})`;
@@ -160,17 +160,17 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
     return groupList(dataList);
   }
   return (
-    <>
+    <div style={style}>
       <div ref={coppyRef} className={styles.coppy}>
         <span>
-          <CopySvg></CopySvg>
-          <span> Copied</span>
+          <IconFont type="databend-Copy" style={{ fontSize: "30px" }}></IconFont>
+          <span>Copied</span>
         </span>
       </div>
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
         <Row>
           <Col span={3}>
-            <DatabaseSvg></DatabaseSvg>
+            <IconFont type="databend-database1" style={{ fontSize: "34px" }}></IconFont>
           </Col>
           <Col span={20}>
             <Select value={selectDefaultDatabase} style={{ width: "100%" }} onChange={handleDbChange}>
@@ -185,7 +185,7 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
           </Col>
         </Row>
       </Space>
-      <div className={styles.treeArea}>
+      <div className={clsx(styles.treeArea, "global-tree-area")}>
         <SpinLoading tip="Loading..." spinning={loadDatabase}>
           <Row className={styles.searchInput}>
             <Col span={20}>
@@ -195,10 +195,10 @@ const Navigator: FC<Iprops> = ({ getTreeData }): ReactElement => {
               <Button onClick={onRefresh} className={styles.refreshBtn} type="primary" icon={<RefreshSvg />}></Button>
             </Col>
           </Row>
-          <Tree onSelect={onTreeSelect} onExpand={onExpand} expandedKeys={expandedKeys} height={1000} showLine={showLine} switcherIcon={<DownOutlined />} treeData={treeData} />
+          <Tree onSelect={onTreeSelect} onExpand={onExpand} expandedKeys={expandedKeys} height={3000} showLine={showLine} switcherIcon={<IconFont type="databend-table2" style={{ fontSize: "16px", position: "relative", top: "4px" }} />} treeData={treeData} />
         </SpinLoading>
       </div>
-    </>
+    </div>
   );
 };
 
